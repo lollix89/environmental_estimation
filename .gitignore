@@ -1,0 +1,4 @@
+#ignored file
+
+#ignore *.m~ files
+*.m~
