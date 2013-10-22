@@ -1,0 +1,11 @@
+#!/bin/bash
+#$ -N matlab-simulation
+#$ -o matlabSimulation.log
+#$ -j y
+#$ -cwd
+#$ -t 1-30
+#$ -M lorenzo.sarti@epfl.ch
+
+
+matlab -nodisplay -nodesktop -nojvm -r "startSimulation($SGE_TASK_ID, 20),exit" > outputFile
+
