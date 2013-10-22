@@ -20,17 +20,14 @@ for x=1:size(obj.fieldPosterior, 1)
             currentVariance=  (currentDistance/obj.RField.Range)*size(obj.temperatureVector,2)/2;
         end
         
-        likelihoodCurrentCell= pdf(obj.likelihoodDistribution, obj.temperatureVector, obj.temperatureVector(closestValueIndex), currentVariance);
+        likelihoodCurrentCell= pdf(obj.likelihoodDistribution, obj.temperatureVector, obj.temperatureVector(closestValueIndex), (currentDistance+1));
         likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
         
         %         disp('****************debug**********')
         %         disp(strcat('Current position:', num2str(discreteCellPositionX), '-', num2str(discreteCellPositionY)))
         %         disp(strcat('Current cell: ', num2str(x), '-', num2str(y)))
         %         disp(strcat('Distance: ', num2str(currentDistance)))
-        
         obj= computePosterior(obj, x, y, likelihoodCurrentCell);
-        %         disp(strcat('Current cell mutual information: ',
-        %         num2str(obj.mutualInformationMap(x,y))))
     end
 end
 

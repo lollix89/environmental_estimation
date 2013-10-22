@@ -51,7 +51,6 @@ for currentSimulation=1:nSimulations
     sampleTemperatureProbability(r, 1);
     %errorMap= abs(field - temperatureMap);
     
-    
     xSampled= r.data(3,:);
     x= 1:3000;
     RMSEI= interp1(xSampled, r.data(1,:), x);
