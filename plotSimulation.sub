@@ -1,0 +1,9 @@
+#!/bin/bash
+#$ -N matlab-test
+#$ -o matlabTest.log
+#$ -j y
+#$ -cwd
+#$ -M lorenzo.sarti@epfl.ch
+
+matlab -nodisplay -nodesktop -nojvm -r "plotRMSE(),exit"
+
