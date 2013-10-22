@@ -5,5 +5,5 @@
 #$ -cwd
 #$ -M lorenzo.sarti@epfl.ch
 
-matlab -nodisplay -nodesktop -nojvm -r "plotRMSE(),exit"
+matlab -nodisplay -nodesktop -nojvm -r "plotSimulation(1),exit"
 

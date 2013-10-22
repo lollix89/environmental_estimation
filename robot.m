@@ -12,7 +12,7 @@ classdef robot
         temperatureRange=[0,50];
         temperatureInterval= .5;
         fieldExtent;
-        robotPosition;
+        robotPosition=[];
         entropyMap=[];
         iteration= 1;
         gain= 5;
@@ -58,8 +58,14 @@ classdef robot
                     end
                 end
             end
-            %--------------assign a arandom position in the grid-------------
-            obj.robotPosition = randi([1,obj.fieldExtent(1)],1,2);
+            %--------------assign a a random position in the grid-------------
+            availablePositionMatrix= ones(obj.fieldExtent(1), obj.fieldExtent(2));
+            occupiedPositions = sub2ind(size(availablePositionMatrix), obj.stations(:,1), obj.stations(:,2));
+            availablePositionMatrix(occupiedPositions)= 0;
+            availablePositionIndexes= find(availablePositionMatrix== 1);
+            randIdx= randi([1,size(availablePositionIndexes,1)]);
+            availablePositionIndexes(randIdx,1);
+            [obj.robotPosition(1), obj.robotPosition(2)]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
             obj.path= [obj.path obj.robotPosition'];
             %---------------create temperatureVector------------------
             obj.temperatureVector= (obj.temperatureRange(1):obj.temperatureInterval:obj.temperatureRange(2));
@@ -112,7 +118,8 @@ classdef robot
                 bestCellX= ceil(obj.robotPosition(1)/5) + bestDirection(1);
                 bestCellY= ceil(obj.robotPosition(2)/5) + bestDirection(2);
                 
-                if bestCellX >0 && bestCellX <= size(obj.mutualInformationMap,1) && bestCellY >0 && bestCellY <= size(obj.mutualInformationMap,2)
+                if bestCellX >0 && bestCellX <= size(obj.mutualInformationMap,1) && bestCellY >0 && bestCellY <= size(obj.mutualInformationMap,2) ...
+                        && ~( any(obj.stations(:,1)== bestCellX) && any(obj.stations(:,2)== bestCellY) )
                     %--------move the robot to the center of the best cell found ---
                     previousPosition= obj.robotPosition;
                     obj.robotPosition=[(bestCellX*5)-2 (bestCellY*5)-2];

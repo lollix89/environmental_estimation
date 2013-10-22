@@ -5,17 +5,17 @@ fileList=dir('./results/newSimulationResultJob_*.mat');
 shortRange=cell(nRobots);
 mediumRange=cell(nRobots);
 longRange=cell(nRobots);
-%assume L.currentMSE is a column vector
+%assume L.currentRMSE is a column vector
 
 for i=1:length(fileList)
     L=load(strcat('./results/', fileList(i).name));
     
     if mod(L.jobID, 3)== 1
-        shortRange{L.nRobots}(:, size(shortRange{L.nRobots}, 2)+1)= L.RMSEI;
+        shortRange{1}(:, size(shortRange{1}, 2)+1)= L.RMSEI;
     elseif mod(L.jobID, 3)== 2
-        mediumRange{L.nRobots}(:, size(mediumRange{L.nRobots}, 2)+1)= L.RMSEI;
+        mediumRange{1}(:, size(mediumRange{1}, 2)+1)= L.RMSEI;
     else
-        longRange{L.nRobots}(:, size(longRange{L.nRobots}, 2)+1)= L.RMSEI;
+        longRange{1}(:, size(longRange{1}, 2)+1)= L.RMSEI;
     end
 end
 
