@@ -2,8 +2,8 @@
 %greedy strategy ie move to the neighbouring cell with the higest
 %value in the mutual information map
 function bestDirection= findBestDirection(obj)
-x= ceil(obj.robotPosition(1)/5);
-y= ceil(obj.robotPosition(2)/5);
+x= ceil(obj.robotPosition(1)/obj.gridCoarseness);
+y= ceil(obj.robotPosition(2)/obj.gridCoarseness);
 
 %checking x boundaries
 if x== size(obj.mutualInformationMap,1)

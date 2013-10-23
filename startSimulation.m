@@ -8,7 +8,6 @@ PlotOn= 1;
 stations=[];
 stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
 stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
-
 %--------------start simulation
 for currentSimulation=1:nSimulations
     
@@ -40,6 +39,12 @@ for currentSimulation=1:nSimulations
         figure(1)
         subplot(3,2,3)
         imagesc(r.RField.Field)
+        hold on;
+        for i=1:size(stations,1)
+            plot(stations(i,2),stations(i,1), 'ko')
+        end
+        drawnow
+        
         hold on;
     end
     

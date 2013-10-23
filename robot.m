@@ -16,6 +16,7 @@ classdef robot
         entropyMap=[];
         iteration= 1;
         gain= 5;
+        gridCoarseness= 4;
         %For simulating the environment the object Field returns the values
         %of the field
         RField;
@@ -50,8 +51,7 @@ classdef robot
                                 obj.temperatureInterval    = tInterval;
                                 
                                 if nargin > 5
-                                    obj.likelihoodDistribution  = lDistribution;
-                                    
+                                    obj.likelihoodDistribution  = lDistribution;   
                                 end
                             end
                         end
@@ -59,7 +59,7 @@ classdef robot
                 end
             end
             %--------------assign a a random position in the grid-------------
-            availablePositionMatrix= ones(obj.fieldExtent(1), obj.fieldExtent(2));
+            availablePositionMatrix= ones(obj.fieldExtent);
             occupiedPositions = sub2ind(size(availablePositionMatrix), obj.stations(:,1), obj.stations(:,2));
             availablePositionMatrix(occupiedPositions)= 0;
             availablePositionIndexes= find(availablePositionMatrix== 1);
@@ -73,18 +73,19 @@ classdef robot
             obj= initializeLikelihood(obj);
             obj= initializePriorDistribution(obj);
             %----------------initialize mutualInformationMap---------------
-            obj.mutualInformationMap= 30.*ones(ceil(obj.fieldExtent(1)/5),ceil(obj.fieldExtent(2)/5));
+            obj.mutualInformationMap= 30.*ones(ceil(obj.fieldExtent(1)/obj.gridCoarseness),ceil(obj.fieldExtent(2)/obj.gridCoarseness));
             %---------------initialize entropy map-------------------------
             obj.entropyMap= updateEntropyMap(obj);
             %------------sample field at current position and at eventually present stations-------------
             obj.stations(end+1,:)= obj.robotPosition;
             for idx=1:size(obj.stations,1)
-                fieldValue= obj.RField.sampleField(obj.stations(idx,1),obj.stations(idx,2));
+                fieldValue= obj.RField.sampleField(obj.stations(idx,1),obj.stations(idx,2), obj.gridCoarseness);
                 %compute posterior update prior for the environment and update
                 %mutual information map
                 obj= updatePosteriorMap(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
                 obj.entropyMap= updateEntropyMap(obj);
             end
+            obj.stations= obj.stations(1:end-1,:);
         end
         
         %----------plot likelihood--------------------
@@ -98,10 +99,10 @@ classdef robot
             totalEntropy= sum(obj.entropyMap(:));
             %---------------------saving RMSE for comparison-----------------
             temperatureMap= sampleTemperatureProbability(obj, 0);
-            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:5:ceil(obj.fieldExtent(1)/5), 1:5:ceil(obj.fieldExtent(2)/5))-...
-                obj.RField.Field(1:5:ceil(obj.fieldExtent(1)/5),1:5:ceil(obj.fieldExtent(1)/5))).^2))); obj.iteration; obj.distance; totalEntropy];
+            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness), 1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))-...
+                obj.RField.Field(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness),1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness))).^2))); obj.iteration; obj.distance; totalEntropy];
             %-----------plot current entropy--------------------
-            if PlotOn== 1  
+            if PlotOn== 1
                 subplot(3,2,2)
                 title('Entropy plot')
                 ylabel('Entropy')
@@ -115,14 +116,14 @@ classdef robot
             i= 1;
             boundary= 0;
             while i< obj.gain && boundary== 0
-                bestCellX= ceil(obj.robotPosition(1)/5) + bestDirection(1);
-                bestCellY= ceil(obj.robotPosition(2)/5) + bestDirection(2);
+                bestCellX= ceil(obj.robotPosition(1)/obj.gridCoarseness) + bestDirection(1);
+                bestCellY= ceil(obj.robotPosition(2)/obj.gridCoarseness) + bestDirection(2);
                 
                 if bestCellX >0 && bestCellX <= size(obj.mutualInformationMap,1) && bestCellY >0 && bestCellY <= size(obj.mutualInformationMap,2) ...
-                        && ~( any(obj.stations(:,1)== bestCellX) && any(obj.stations(:,2)== bestCellY) )
+                        && ~(any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestCellX bestCellY] , 'rows')))
                     %--------move the robot to the center of the best cell found ---
                     previousPosition= obj.robotPosition;
-                    obj.robotPosition=[(bestCellX*5)-2 (bestCellY*5)-2];
+                    obj.robotPosition=[(bestCellX*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (bestCellY*obj.gridCoarseness)-floor(obj.gridCoarseness/2)];
                     obj.path= [obj.path obj.robotPosition'];
                     obj.distance= obj.distance+ pdist([previousPosition; obj.robotPosition]);
                     %------------plot the path followed on the map---------
@@ -134,11 +135,16 @@ classdef robot
                         hold on;
                         drawnow
                     end
-                    fieldValue= obj.RField.sampleField(obj.robotPosition(1),obj.robotPosition(2));
+                    fieldValue= obj.RField.sampleField(obj.robotPosition(1),obj.robotPosition(2), obj.gridCoarseness);
                     %-------compute posterior update prior for the environment and update
                     %mutual information map-------------
                     obj= updatePosteriorMap(obj, fieldValue);
                 else
+                    %disp('boundary found')
+                    if any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestCellX bestCellY], 'rows'))
+                        disp('I M HEREEEEEEEEEEEEEEEEEE************')
+                        disp('station boundary')
+                    end
                     boundary= 1;
                 end
                 i=i+1;
@@ -150,6 +156,10 @@ classdef robot
             if PlotOn==1
                 subplot(3,2,1)
                 imagesc(obj.mutualInformationMap)
+                hold on;
+                for i=1:size(obj.stations,1)
+                    plot(ceil(obj.stations(i,2)/obj.gridCoarseness),ceil(obj.stations(i,1)/obj.gridCoarseness), 'ko')
+                end
                 title('Mutual information map')
                 drawnow
             end
@@ -172,7 +182,7 @@ classdef robot
         %initialize prior for every cell of the environment
         function obj = initializePriorDistribution(obj)
             
-            %The grid is divided into 5m spaced CELLS and every cell is given a
+            %The grid is divided into gridcoarseness (m) spaced CELLS and every cell is given a
             %uniform probability distribution (uniformative prior). Waypoint
             %distance is formed by a grid of 10 m spaced points
             
@@ -185,8 +195,8 @@ classdef robot
             %             +--+---+--+--+
             %             |  |   |  |  |
             %           (+*)-+-(*+)-+-(*+)
-            for i=1:(obj.fieldExtent(1)/5)
-                for j=1:(obj.fieldExtent(2)/5)
+            for i=1:(obj.fieldExtent(1)/obj.gridCoarseness)
+                for j=1:(obj.fieldExtent(2)/obj.gridCoarseness)
                     obj.fieldPrior(i,j,:)= ones(1,1, size(obj.temperatureVector, 2))./size(obj.temperatureVector, 2);
                 end
             end

@@ -1,10 +1,10 @@
 function obj= updatePosteriorMap(obj,fieldValue, x, y)
 if nargin == 2
-    discreteCellPositionX= ceil(obj.robotPosition(1)/5);
-    discreteCellPositionY= ceil(obj.robotPosition(2)/5);
+    discreteCellPositionX= ceil(obj.robotPosition(1)/obj.gridCoarseness);
+    discreteCellPositionY= ceil(obj.robotPosition(2)/obj.gridCoarseness);
 else
-    discreteCellPositionX= ceil(x/5);
-    discreteCellPositionY= ceil(y/5);
+    discreteCellPositionX= ceil(x/obj.gridCoarseness);
+    discreteCellPositionY= ceil(y/obj.gridCoarseness);
 end
 
 [~, closestValueIndex] = min(abs(obj.temperatureVector-fieldValue));

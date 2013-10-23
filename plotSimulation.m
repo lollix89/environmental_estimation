@@ -1,5 +1,5 @@
 
-function plotRMSE(nRobots)
+function plotSimulation(nRobots)
 close all
 fileList=dir('./results/newSimulationResultJob_*.mat');
 shortRange=cell(nRobots);
@@ -8,14 +8,13 @@ longRange=cell(nRobots);
 %assume L.currentRMSE is a column vector
 
 for i=1:length(fileList)
-    L=load(strcat('./results/', fileList(i).name));
-    
+    L=load(strcat('./results/', fileList(i).name));        
     if mod(L.jobID, 3)== 1
-        shortRange{1}(:, size(shortRange{1}, 2)+1)= L.RMSEI;
+        shortRange{nRobots}(:, size(shortRange{nRobots}, 2)+1)= L.RMSEI';
     elseif mod(L.jobID, 3)== 2
-        mediumRange{1}(:, size(mediumRange{1}, 2)+1)= L.RMSEI;
+        mediumRange{nRobots}(:, size(mediumRange{nRobots}, 2)+1)= L.RMSEI';
     else
-        longRange{1}(:, size(longRange{1}, 2)+1)= L.RMSEI;
+        longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSEI';
     end
 end
 
