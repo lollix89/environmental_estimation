@@ -8,12 +8,6 @@ obj.fieldPosterior(x,y,:)= reshape(posterior, 1,1, size(obj.temperatureVector,2)
 
 %update mutual information!!
 obj= updateMutualInformation(obj, x, y);
-
-%             figure(2)
-%             plot(obj.temperatureVector, reshape(obj.fieldPrior(x,y, :), 1, size(obj.temperatureVector,2))', 'b');
-%             hold on;
-%             plot(obj.temperatureVector, reshape(obj.fieldPosterior(x,y, :), 1, size(obj.temperatureVector,2))','r');
-%             hold off;
 %update prior with computed posterior
 obj.fieldPrior(x,y,:)= obj.fieldPosterior(x,y,:);
 %

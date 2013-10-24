@@ -9,25 +9,34 @@ end
 
 [~, closestValueIndex] = min(abs(obj.temperatureVector-fieldValue));
 
-for x=1:size(obj.fieldPosterior, 1)
-    for y=1:size(obj.fieldPosterior, 2)
-        %compute distance from the current position of the robot
-        currentDistance= pdist([discreteCellPositionX discreteCellPositionY; x y]);
-        %first attempt of relating field range to variance
-        if currentDistance <= obj.RField.Range
-            currentVariance= (obj.RField.Range- currentDistance)/obj.RField.Range*obj.likelihoodVariance + (currentDistance/obj.RField.Range)*size(obj.temperatureVector,2)/2;
+for x_=1:size(obj.fieldPosterior, 1)
+    for y_=1:size(obj.fieldPosterior, 2)
+        %compute distance from the current position of the robot on the
+        %discrete grid
+        currentDistance= pdist([discreteCellPositionX discreteCellPositionY; x_ y_]);
+        
+        sill= 25* (1/obj.temperatureInterval);
+        discreteRange= (obj.RField.Range)/obj.gridCoarseness;
+        
+        if currentDistance <= discreteRange
+            varianceFunction= obj.likelihoodVariance + (sill - obj.likelihoodVariance)*(1.5*(currentDistance/discreteRange)-.5*(currentDistance/discreteRange)^3);
         else
-            currentVariance=  (currentDistance/obj.RField.Range)*size(obj.temperatureVector,2)/2;
+            varianceFunction=  sill;
         end
         
-        likelihoodCurrentCell= pdf(obj.likelihoodDistribution, obj.temperatureVector, obj.temperatureVector(closestValueIndex), (currentDistance+1));
-        likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
+%         if currentDistance < 5
+%             disp('%%%%%%%%%%%%%%%%%%')
+%             disp(strcat('current cell is: ', num2str(x_), '-', num2str(y_)))
+%             disp(strcat('pivot cell is: ', num2str(discreteCellPositionX), '-', num2str(discreteCellPositionY)))
+%             disp(strcat('currentDistance: ', num2str(currentDistance)))
+%             disp(strcat('discreteRange: ', num2str(discreteRange)))
+%             disp(strcat('variance value: ', num2str(varianceFunction)))
+%             disp('%%%%%%%%%%%%%%%%%%')
+%         end
         
-        %         disp('****************debug**********')
-        %         disp(strcat('Current position:', num2str(discreteCellPositionX), '-', num2str(discreteCellPositionY)))
-        %         disp(strcat('Current cell: ', num2str(x), '-', num2str(y)))
-        %         disp(strcat('Distance: ', num2str(currentDistance)))
-        obj= computePosterior(obj, x, y, likelihoodCurrentCell);
+        likelihoodCurrentCell= pdf(obj.likelihoodDistribution, obj.temperatureVector, obj.temperatureVector(closestValueIndex), varianceFunction);
+        likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
+        obj= computePosterior(obj, x_, y_, likelihoodCurrentCell);
     end
 end
 

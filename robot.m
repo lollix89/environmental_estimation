@@ -8,15 +8,15 @@ classdef robot
         likelihood = [];
         temperatureVector= [];
         likelihoodDistribution= 'norm';
-        likelihoodVariance= 1;
-        temperatureRange=[0,50];
+        likelihoodVariance= .5;
+        temperatureRange=[-12,58];
         temperatureInterval= .5;
         fieldExtent;
         robotPosition=[];
         entropyMap=[];
         iteration= 1;
-        gain= 5;
-        gridCoarseness= 4;
+        gain= 1;
+        gridCoarseness= 5;
         %For simulating the environment the object Field returns the values
         %of the field
         RField;
@@ -60,7 +60,10 @@ classdef robot
             end
             %--------------assign a a random position in the grid-------------
             availablePositionMatrix= ones(obj.fieldExtent);
-            occupiedPositions = sub2ind(size(availablePositionMatrix), obj.stations(:,1), obj.stations(:,2));
+            occupiedPositions= [];
+            if ~isempty(obj.stations)
+                occupiedPositions = sub2ind(size(availablePositionMatrix), obj.stations(:,1), obj.stations(:,2));              
+            end
             availablePositionMatrix(occupiedPositions)= 0;
             availablePositionIndexes= find(availablePositionMatrix== 1);
             randIdx= randi([1,size(availablePositionIndexes,1)]);
@@ -100,7 +103,8 @@ classdef robot
             %---------------------saving RMSE for comparison-----------------
             temperatureMap= sampleTemperatureProbability(obj, 0);
             obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness), 1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))-...
-                obj.RField.Field(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness),1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness))).^2))); obj.iteration; obj.distance; totalEntropy];
+                obj.RField.Field(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness),1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))).^2))); ...
+                obj.iteration; obj.distance; totalEntropy];
             %-----------plot current entropy--------------------
             if PlotOn== 1
                 subplot(3,2,2)
@@ -125,7 +129,7 @@ classdef robot
                     previousPosition= obj.robotPosition;
                     obj.robotPosition=[(bestCellX*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (bestCellY*obj.gridCoarseness)-floor(obj.gridCoarseness/2)];
                     obj.path= [obj.path obj.robotPosition'];
-                    obj.distance= obj.distance+ pdist([previousPosition; obj.robotPosition]);
+                    obj.distance= obj.distance + pdist([previousPosition; obj.robotPosition]);
                     %------------plot the path followed on the map---------
                     if PlotOn==1
                         subplot(3,2,3)
@@ -140,11 +144,6 @@ classdef robot
                     %mutual information map-------------
                     obj= updatePosteriorMap(obj, fieldValue);
                 else
-                    %disp('boundary found')
-                    if any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestCellX bestCellY], 'rows'))
-                        disp('I M HEREEEEEEEEEEEEEEEEEE************')
-                        disp('station boundary')
-                    end
                     boundary= 1;
                 end
                 i=i+1;
@@ -169,7 +168,7 @@ classdef robot
         
     end
     
-    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     methods(Access = private)
         %initialize likelihood matrix (oss: observations y are on rows, real values x are on columns)
         function obj = initializeLikelihood(obj)

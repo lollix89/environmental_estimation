@@ -45,6 +45,9 @@ for i=1:nRobots
 end
 
 plotRangeX = (1:3000)';
+if ~exist('./plot', 'dir')
+    mkdir('./plot');
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 shortFigure= figure();
@@ -58,12 +61,12 @@ hold on
 %adding error bars for STD
 for i=1:nRobots
     tmpY= shortRangePlotY(:,i);
-    tmpY= tmpY(1+i:10:end);
+    tmpY= tmpY(1+i:100:end);
     tmpSTD= shortRangeSTD(:,i);
-    tmpSTD= tmpSTD(1+i:10:end);
-    errorbar(plotRangeX(1+i:10:end), tmpY, tmpSTD, '.k')
+    tmpSTD= tmpSTD(1+i:100:end);
+    errorbar(plotRangeX(1+i:100:end), tmpY, tmpSTD, '.k')
 end
-saveas(shortFigure,'shortRange','pdf')
+saveas(shortFigure,'./plot/shortRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -78,12 +81,12 @@ hold on
 %adding error bars for STD
 for i=1:nRobots
     tmpY= mediumRangePLotY(:,i);
-    tmpY= tmpY(1+i:10:end);
+    tmpY= tmpY(1+i:100:end);
     tmpSTD= mediumRangeSTD(:,i);
-    tmpSTD= tmpSTD(1+i:10:end);
-    errorbar(plotRangeX(1+i:10:end), tmpY, tmpSTD, '.k')
+    tmpSTD= tmpSTD(1+i:100:end);
+    errorbar(plotRangeX(1+i:100:end), tmpY, tmpSTD, '.k')
 end
-saveas(mediumFigure,'mediumRange','pdf')
+saveas(mediumFigure,'./plot/mediumRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -98,12 +101,12 @@ hold on
 %adding error bars for STD
 for i=1:nRobots
     tmpY= longRangePlotY(:,i);
-    tmpY= tmpY(1+i:10:end);
+    tmpY= tmpY(1+i:100:end);
     tmpSTD= longRangeSTD(:,i);
-    tmpSTD= tmpSTD(1+i:10:end);
-    errorbar(plotRangeX(1+i:10:end), tmpY, tmpSTD, '.k')
+    tmpSTD= tmpSTD(1+i:100:end);
+    errorbar(plotRangeX(1+i:100:end), tmpY, tmpSTD, '.k')
 end
-saveas(longFigure,'longRange','pdf')
+saveas(longFigure,'./plot/longRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -123,7 +126,7 @@ legend(legendNames)
 %     tmpSTD= tmpSTD(1+i:10:end);
 %     errorbar(plotRangeX(1+i:10:end), tmpY, tmpSTD, '.k','LineWidth',1.5)
 % end
-saveas(totalFigure,'total','pdf')
+saveas(totalFigure,'./plot/total','pdf')
 %hold off
 
 end

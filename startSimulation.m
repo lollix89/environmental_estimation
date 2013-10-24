@@ -70,14 +70,12 @@ for currentSimulation=1:nSimulations
         title('RMSE error')
         
         %-------------------plot entropy values w.r.t. meters-------
-        %     subplot(3,2,6)
-        %     xSampled= r.data(3,:);
-        %     x= 1:3000;
-        %     plot(x, entropyI)
-        %     grid on
-        %     ylabel('Entropy')
-        %     xlabel('meters')
-        %     title('Total entropy')
+        subplot(3,2,6)
+        plot(x, entropyI)
+        grid on
+        ylabel('Entropy')
+        xlabel('meters')
+        title('Total entropy')
     end
     %---------------saves results on file-------------------------
     if ~exist('./results', 'dir')
