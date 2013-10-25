@@ -2,6 +2,7 @@ classdef robot
     properties
         mutualInformationMap;
         path=[]
+        samplingPoints=[];
         stations=[];
         fieldPrior=[];
         fieldPosterior=[];
@@ -17,6 +18,7 @@ classdef robot
         iteration= 1;
         gain= 5;
         gridCoarseness= 5;
+        GPSCoarseness= 5;
         %For simulating the environment the object Field returns the values
         %of the field
         RField;
@@ -43,15 +45,12 @@ classdef robot
                     obj.stations= staticStations;
                     if nargin > 2
                         obj.likelihoodVariance = lVariance;
-                        
                         if nargin > 3
                             obj.temperatureRange   = tRange;
-                            
                             if nargin > 4
                                 obj.temperatureInterval    = tInterval;
-                                
                                 if nargin > 5
-                                    obj.likelihoodDistribution  = lDistribution;   
+                                    obj.likelihoodDistribution  = lDistribution;
                                 end
                             end
                         end
@@ -62,7 +61,7 @@ classdef robot
             availablePositionMatrix= ones(obj.fieldExtent);
             occupiedPositions= [];
             if ~isempty(obj.stations)
-                occupiedPositions = sub2ind(size(availablePositionMatrix), obj.stations(:,1), obj.stations(:,2));              
+                occupiedPositions = sub2ind(size(availablePositionMatrix), obj.stations(:,1), obj.stations(:,2));
             end
             availablePositionMatrix(occupiedPositions)= 0;
             availablePositionIndexes= find(availablePositionMatrix== 1);
@@ -89,11 +88,7 @@ classdef robot
                 obj.entropyMap= updateEntropyMap(obj);
             end
             obj.stations= obj.stations(1:end-1,:);
-        end
-        
-        %----------plot likelihood--------------------
-        function obj = plotLikelihood(obj)
-            surf(obj.likelihood)
+            obj.samplingPoints= [ceil(obj.robotPosition(1)/obj.gridCoarseness); ceil(obj.robotPosition(2)/obj.gridCoarseness)];
         end
         
         %------------flies around the environment-----------------
@@ -115,21 +110,46 @@ classdef robot
                 hold on;
             end
             bestDirection= findBestDirection(obj);
-            %----------gain controls how many cells the robot moves in that direction
+            %----------gain controls how many cells the robot moves in that
+            %direction
             %before recomputing the best trajectory----------------
             i= 1;
             boundary= 0;
+            attempt= 1;
             while i< obj.gain && boundary== 0
-                bestCellX= ceil(obj.robotPosition(1)/obj.gridCoarseness) + bestDirection(1);
-                bestCellY= ceil(obj.robotPosition(2)/obj.gridCoarseness) + bestDirection(2);
+                bestWaypointX= ceil(obj.robotPosition(1)/obj.GPSCoarseness) + bestDirection(1,attempt);
+                bestWaypointY= ceil(obj.robotPosition(2)/obj.GPSCoarseness) + bestDirection(2,attempt);
                 
-                if bestCellX >0 && bestCellX <= size(obj.mutualInformationMap,1) && bestCellY >0 && bestCellY <= size(obj.mutualInformationMap,2) ...
-                        && ~(any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestCellX bestCellY] , 'rows')))
-                    %--------move the robot to the center of the best cell found ---
+                if bestWaypointX >0 && bestWaypointX <= obj.fieldExtent(1)/obj.GPSCoarseness && bestWaypointY >0 && bestWaypointY <= obj.fieldExtent(2)/obj.GPSCoarseness ...
+                        && ~(any(ismember(ceil(obj.stations./obj.GPSCoarseness), [bestWaypointX bestWaypointY] , 'rows')))
+                    
+                    %-------once i m here i know all the moves are legal----
+                    for samplePoint= 1: obj.GPSCoarseness/obj.gridCoarseness
+                        %--------sampling points on the way to the next waypoint ----
+                        bestCellX= ceil(obj.robotPosition(1)/obj.gridCoarseness) + bestDirection(1,attempt);
+                        bestCellY= ceil(obj.robotPosition(2)/obj.gridCoarseness) + bestDirection(2,attempt);
+                        
+                        obj.samplingPoints= [obj.samplingPoints [(bestCellX*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (bestCellY*obj.gridCoarseness)-floor(obj.gridCoarseness/2)]'];
+                        obj.distance= obj.distance + pdist([obj.samplingPoints(:, end-1)'; obj.samplingPoints(:,end)']);
+                        
+                        %------------plot the sampling points on the map---------
+                        currentSamplingPoint= obj.samplingPoints(:, end);
+                        if PlotOn==1
+                            subplot(3,2,3)
+                            title('Robot path on the field')
+                            plot(currentSamplingPoint(2,1),currentSamplingPoint(1,1), 'k+')
+                            hold on;
+                            drawnow
+                        end
+                        fieldValue= obj.RField.sampleField(obj.samplingPoints(1,end),obj.samplingPoints(2,end), obj.gridCoarseness);
+                        %-------compute posterior update prior for the environment and update mutual information map-------------
+                        obj= updatePosteriorMap(obj, fieldValue, obj.samplingPoints(1,end), obj.samplingPoints(2,end));
+                    end
+                    
                     previousPosition= obj.robotPosition;
-                    obj.robotPosition=[(bestCellX*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (bestCellY*obj.gridCoarseness)-floor(obj.gridCoarseness/2)];
+                    obj.robotPosition=[(bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) (bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2)];
                     obj.path= [obj.path obj.robotPosition'];
-                    obj.distance= obj.distance + pdist([previousPosition; obj.robotPosition]);
+                    
                     %------------plot the path followed on the map---------
                     if PlotOn==1
                         subplot(3,2,3)
@@ -139,12 +159,17 @@ classdef robot
                         hold on;
                         drawnow
                     end
-                    fieldValue= obj.RField.sampleField(obj.robotPosition(1),obj.robotPosition(2), obj.gridCoarseness);
-                    %-------compute posterior update prior for the environment and update
-                    %mutual information map-------------
-                    obj= updatePosteriorMap(obj, fieldValue);
+                    
                 else
-                    boundary= 1;
+                    %if looking for allowed direction try in decreasing
+                    %order all the direection, if already moved, exit and
+                    %recompute gradient
+                    if i==1
+                        attempt= attempt+1;
+                        disp(strcat('!!!!!!!Attempting next direction: ', num2str(attempt)))
+                    else
+                        boundary= 1;
+                    end
                 end
                 i=i+1;
                 obj.iteration= obj.iteration+ 1;

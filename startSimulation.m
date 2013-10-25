@@ -32,7 +32,7 @@ for currentSimulation=1:nSimulations
     %--------------------initialize field-------------------------
     rF= randomField(field,range);
     
-    %--------------------initialize object robot------------------
+    %--------------------initialize object robot--------------------
     r = robot(rF, stations);
     %-----------------plot selected field---------------------
     if PlotOn==1
