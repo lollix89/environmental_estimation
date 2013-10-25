@@ -45,6 +45,7 @@ for i=1:nRobots
 end
 
 plotRangeX = (1:3000)';
+%shortRangePlotY= shortRangePlotY(1:3:3000);
 if ~exist('./plot', 'dir')
     mkdir('./plot');
 end
@@ -69,6 +70,7 @@ end
 saveas(shortFigure,'./plot/shortRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%mediumRangePLotY= mediumRangePLotY(1:3:3000);
 
 mediumFigure=figure();
 plot(plotRangeX,mediumRangePLotY)
@@ -89,6 +91,7 @@ end
 saveas(mediumFigure,'./plot/mediumRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%longRangePlotY= longRangePlotY(1:3:3000);
 
 longFigure=figure();
 plot(plotRangeX,longRangePlotY)
@@ -109,6 +112,7 @@ end
 saveas(longFigure,'./plot/longRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+totalPlotY= totalPlotY(1:3:3000);
 
 totalFigure=figure();
 plot(plotRangeX,totalPlotY)

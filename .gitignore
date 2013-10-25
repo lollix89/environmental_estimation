@@ -2,3 +2,4 @@
 
 #ignore *.m~ files
 *.m~
+.DS_Store
