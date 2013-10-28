@@ -88,7 +88,7 @@ classdef robot
                 obj.entropyMap= updateEntropyMap(obj);
             end
             obj.stations= obj.stations(1:end-1,:);
-            obj.samplingPoints= [ceil(obj.robotPosition(1)/obj.gridCoarseness); ceil(obj.robotPosition(2)/obj.gridCoarseness)];
+            obj.samplingPoints= [obj.robotPosition(1); obj.robotPosition(2)];
         end
         
         %------------flies around the environment-----------------
@@ -113,7 +113,7 @@ classdef robot
             %----------gain controls how many cells the robot moves in that
             %direction
             %before recomputing the best trajectory----------------
-            i= 1;
+            i= 0;
             boundary= 0;
             attempt= 1;
             while i< obj.gain && boundary== 0
@@ -126,21 +126,21 @@ classdef robot
                     %-------once i m here i know all the moves are legal----
                     for samplePoint= 1: obj.GPSCoarseness/obj.gridCoarseness
                         %--------sampling points on the way to the next waypoint ----
-                        bestCellX= ceil(obj.robotPosition(1)/obj.gridCoarseness) + bestDirection(1,attempt);
-                        bestCellY= ceil(obj.robotPosition(2)/obj.gridCoarseness) + bestDirection(2,attempt);
+                        bestCellX= ceil(obj.samplingPoints(1,end)/obj.gridCoarseness) + bestDirection(1,attempt);
+                        bestCellY= ceil(obj.samplingPoints(2,end)/obj.gridCoarseness) + bestDirection(2,attempt);
                         
                         obj.samplingPoints= [obj.samplingPoints [(bestCellX*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (bestCellY*obj.gridCoarseness)-floor(obj.gridCoarseness/2)]'];
                         obj.distance= obj.distance + pdist([obj.samplingPoints(:, end-1)'; obj.samplingPoints(:,end)']);
                         
                         %------------plot the sampling points on the map---------
                         currentSamplingPoint= obj.samplingPoints(:, end);
-                        if PlotOn==1
-                            subplot(3,2,3)
-                            title('Robot path on the field')
-                            plot(currentSamplingPoint(2,1),currentSamplingPoint(1,1), 'k+')
-                            hold on;
-                            drawnow
-                        end
+%                         if PlotOn==1
+%                             subplot(3,2,3)
+%                             title('Robot path on the field')
+%                             plot(currentSamplingPoint(2,1),currentSamplingPoint(1,1), 'k+')
+%                             hold on;
+%                             drawnow
+%                         end
                         fieldValue= obj.RField.sampleField(obj.samplingPoints(1,end),obj.samplingPoints(2,end), obj.gridCoarseness);
                         %-------compute posterior update prior for the environment and update mutual information map-------------
                         obj= updatePosteriorMap(obj, fieldValue, obj.samplingPoints(1,end), obj.samplingPoints(2,end));
@@ -166,8 +166,13 @@ classdef robot
                     %recompute gradient
                     if i==1
                         attempt= attempt+1;
+                        %decreasing i and iteration since are increased
+                        %once out of the loop
+                        i=i-1;
+                        obj.iteration= obj.iteration-1;
                         disp(strcat('!!!!!!!Attempting next direction: ', num2str(attempt)))
                     else
+                        disp('boundary found... exiting')
                         boundary= 1;
                     end
                 end
@@ -181,8 +186,8 @@ classdef robot
                 subplot(3,2,1)
                 imagesc(obj.mutualInformationMap)
                 hold on;
-                for i=1:size(obj.stations,1)
-                    plot(ceil(obj.stations(i,2)/obj.gridCoarseness),ceil(obj.stations(i,1)/obj.gridCoarseness), 'ko')
+                for j=1:size(obj.stations,1)
+                    plot(ceil(obj.stations(j,2)/obj.gridCoarseness),ceil(obj.stations(j,1)/obj.gridCoarseness), 'ko')
                 end
                 title('Mutual information map')
                 drawnow

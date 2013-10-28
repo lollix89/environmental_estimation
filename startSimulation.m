@@ -2,7 +2,7 @@ function startSimulation(jobID, nSimulations)
 
 close all
 global PlotOn;
-PlotOn= 1;
+PlotOn= 0;
 
 %-------------position of the stations (static sensors)--------------
 stations=[];

@@ -7,5 +7,5 @@
 #$ -M lorenzo.sarti@epfl.ch
 
 
-matlab -nodisplay -nodesktop -nojvm -r "startSimulation($SGE_TASK_ID, 20),exit" > outputFile
+matlab -nodisplay -nodesktop -nojvm -r "startSimulation($SGE_TASK_ID, 15),exit" > stdout
 

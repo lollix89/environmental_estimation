@@ -1,25 +1,28 @@
 function obj= updatePosteriorMap(obj,fieldValue, x, y)
 if nargin == 2
-    discreteCellPositionX= ceil(obj.robotPosition(1)/obj.gridCoarseness);
-    discreteCellPositionY= ceil(obj.robotPosition(2)/obj.gridCoarseness);
+%     discreteCellPositionX= ceil(obj.robotPosition(1)/obj.gridCoarseness);
+%     discreteCellPositionY= ceil(obj.robotPosition(2)/obj.gridCoarseness);
+    posX= obj.robotPosition(1);
+    posY= obj.robotPosition(2);
 else
-    discreteCellPositionX= ceil(x/obj.gridCoarseness);
-    discreteCellPositionY= ceil(y/obj.gridCoarseness);
+%     discreteCellPositionX= ceil(x/obj.gridCoarseness);
+%     discreteCellPositionY= ceil(y/obj.gridCoarseness);
+    posX= x;
+    posY= y;
 end
 
 [~, closestValueIndex] = min(abs(obj.temperatureVector-fieldValue));
+sill= 25;
 
 for x_=1:size(obj.fieldPosterior, 1)
     for y_=1:size(obj.fieldPosterior, 2)
         %compute distance from the current position of the robot on the
         %discrete grid
-        currentDistance= pdist([discreteCellPositionX discreteCellPositionY; x_ y_]);
+        currentDistance= pdist([posX posY; (x_*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (y_*obj.gridCoarseness)-floor(obj.gridCoarseness/2)]);
         
-        sill= 25* (1/obj.temperatureInterval);
-        discreteRange= (obj.RField.Range)/obj.gridCoarseness;
-        
-        if currentDistance <= discreteRange
-            varianceFunction= obj.likelihoodVariance + (sill - obj.likelihoodVariance)*(1.5*(currentDistance/discreteRange)-.5*(currentDistance/discreteRange)^3);
+       
+        if currentDistance <= obj.RField.Range
+            varianceFunction= obj.likelihoodVariance + (sill*(1.5*(currentDistance/obj.RField.Range)-.5*(currentDistance/obj.RField.Range)^3));     %not sure about summing up the variances
         else
             varianceFunction=  sill;
         end

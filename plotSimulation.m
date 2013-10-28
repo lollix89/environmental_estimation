@@ -5,10 +5,14 @@ fileList=dir('./results/newSimulationResultJob_*.mat');
 shortRange=cell(nRobots);
 mediumRange=cell(nRobots);
 longRange=cell(nRobots);
+sampleFactor= 150;
+
 %assume L.currentRMSE is a column vector
 
 for i=1:length(fileList)
-    L=load(strcat('./results/', fileList(i).name));        
+    L=load(strcat('./results/', fileList(i).name));  
+    L.RMSEI=  L.RMSEI(1:sampleFactor:3000);
+    
     if mod(L.jobID, 3)== 1
         shortRange{nRobots}(:, size(shortRange{nRobots}, 2)+1)= L.RMSEI';
     elseif mod(L.jobID, 3)== 2
@@ -28,6 +32,7 @@ totalPlotY=[];
 totalPlotSTD=[];
 legendNames=[];
 
+
 for i=1:nRobots
     shortRangePlotY= [shortRangePlotY mean(shortRange{i},2)];
     shortRangeSTD= [shortRangeSTD std(shortRange{i},1,2)];
@@ -44,8 +49,7 @@ for i=1:nRobots
     legendNames=[legendNames; strcat(num2str(i),' robots')];
 end
 
-plotRangeX = (1:3000)';
-%shortRangePlotY= shortRangePlotY(1:3:3000);
+plotRangeX = (1:sampleFactor:3000)';
 if ~exist('./plot', 'dir')
     mkdir('./plot');
 end
@@ -62,16 +66,12 @@ hold on
 %adding error bars for STD
 for i=1:nRobots
     tmpY= shortRangePlotY(:,i);
-    tmpY= tmpY(1+i:100:end);
     tmpSTD= shortRangeSTD(:,i);
-    tmpSTD= tmpSTD(1+i:100:end);
-    errorbar(plotRangeX(1+i:100:end), tmpY, tmpSTD, '.k')
+    errorbar(plotRangeX, tmpY, tmpSTD, '.k')
 end
 saveas(shortFigure,'./plot/shortRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%mediumRangePLotY= mediumRangePLotY(1:3:3000);
-
 mediumFigure=figure();
 plot(plotRangeX,mediumRangePLotY)
 title('mediumRange RandomField comparison')
@@ -83,16 +83,12 @@ hold on
 %adding error bars for STD
 for i=1:nRobots
     tmpY= mediumRangePLotY(:,i);
-    tmpY= tmpY(1+i:100:end);
     tmpSTD= mediumRangeSTD(:,i);
-    tmpSTD= tmpSTD(1+i:100:end);
-    errorbar(plotRangeX(1+i:100:end), tmpY, tmpSTD, '.k')
+    errorbar(plotRangeX, tmpY, tmpSTD, '.k')
 end
 saveas(mediumFigure,'./plot/mediumRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%longRangePlotY= longRangePlotY(1:3:3000);
-
 longFigure=figure();
 plot(plotRangeX,longRangePlotY)
 title('longRange RandomField comparison')
@@ -104,16 +100,12 @@ hold on
 %adding error bars for STD
 for i=1:nRobots
     tmpY= longRangePlotY(:,i);
-    tmpY= tmpY(1+i:100:end);
     tmpSTD= longRangeSTD(:,i);
-    tmpSTD= tmpSTD(1+i:100:end);
-    errorbar(plotRangeX(1+i:100:end), tmpY, tmpSTD, '.k')
+    errorbar(plotRangeX, tmpY, tmpSTD, '.k')
 end
 saveas(longFigure,'./plot/longRange','pdf')
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-totalPlotY= totalPlotY(1:3:3000);
-
 totalFigure=figure();
 plot(plotRangeX,totalPlotY)
 title('total comparison')

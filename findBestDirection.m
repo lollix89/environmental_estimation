@@ -6,12 +6,15 @@ x= ceil(obj.robotPosition(1)/obj.gridCoarseness);
 y= ceil(obj.robotPosition(2)/obj.gridCoarseness);
 
 bestDirection=[];
+positionX= 2;        %+1 means top, +3 means bottom
+positionY= 2;        %+1 means left, +3 means right
 
 %checking x boundaries
 if x== size(obj.mutualInformationMap,1)
     rangeX=(x-1:x);
 elseif x== 1
     rangeX=(x:x+1);
+    positionX= 1;
 else
     rangeX=(x-1:x+1);
 end
@@ -20,13 +23,18 @@ if y== size(obj.mutualInformationMap,2)
     rangeY=(y-1:y);
 elseif y== 1
     rangeY=(y:y+1);
+    positionY= 1;
 else
     rangeY=(y-1:y+1);
 end
 
 %----------computing difference map-----------
 pivotValue= obj.mutualInformationMap(x,y);
-directionGradientMatrix= obj.mutualInformationMap(rangeX, rangeY)- pivotValue;   
+directionGradientMatrix= obj.mutualInformationMap(rangeX, rangeY)- pivotValue;
+
+%need to make sure the pivot value will be never selected as best direction
+directionGradientMatrix(positionX, positionY)= -Inf;
+
 
 % disp('***debug*****')
 % disp(strcat('current position:', num2str([x y])))
