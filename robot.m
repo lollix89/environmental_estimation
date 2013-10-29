@@ -109,76 +109,39 @@ classdef robot
                 plot(obj.iteration, totalEntropy, 'r-')
                 hold on;
             end
-            bestDirection= findBestDirection(obj);
-            %----------gain controls how many cells the robot moves in that
-            %direction
-            %before recomputing the best trajectory----------------
-            i= 0;
-            boundary= 0;
-            attempt= 1;
-            while i< obj.gain && boundary== 0
-                bestWaypointX= ceil(obj.robotPosition(1)/obj.GPSCoarseness) + bestDirection(1,attempt);
-                bestWaypointY= ceil(obj.robotPosition(2)/obj.GPSCoarseness) + bestDirection(2,attempt);
+            
+            [bestPositionX bestPositionY]= findBestPosition(obj);
+            disp('**************debug************')
+            disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))
+            
+            if ~(any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestPositionX bestPositionY] , 'rows')))
                 
-                if bestWaypointX >0 && bestWaypointX <= obj.fieldExtent(1)/obj.GPSCoarseness && bestWaypointY >0 && bestWaypointY <= obj.fieldExtent(2)/obj.GPSCoarseness ...
-                        && ~(any(ismember(ceil(obj.stations./obj.GPSCoarseness), [bestWaypointX bestWaypointY] , 'rows')))
-                    
-                    %-------once i m here i know all the moves are legal----
-                    for samplePoint= 1: obj.GPSCoarseness/obj.gridCoarseness
-                        %--------sampling points on the way to the next waypoint ----
-                        bestCellX= ceil(obj.samplingPoints(1,end)/obj.gridCoarseness) + bestDirection(1,attempt);
-                        bestCellY= ceil(obj.samplingPoints(2,end)/obj.gridCoarseness) + bestDirection(2,attempt);
-                        
-                        obj.samplingPoints= [obj.samplingPoints [(bestCellX*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (bestCellY*obj.gridCoarseness)-floor(obj.gridCoarseness/2)]'];
-                        obj.distance= obj.distance + pdist([obj.samplingPoints(:, end-1)'; obj.samplingPoints(:,end)']);
-                        
-                        %------------plot the sampling points on the map---------
-                        currentSamplingPoint= obj.samplingPoints(:, end);
-%                         if PlotOn==1
-%                             subplot(3,2,3)
-%                             title('Robot path on the field')
-%                             plot(currentSamplingPoint(2,1),currentSamplingPoint(1,1), 'k+')
-%                             hold on;
-%                             drawnow
-%                         end
-                        fieldValue= obj.RField.sampleField(obj.samplingPoints(1,end),obj.samplingPoints(2,end), obj.gridCoarseness);
-                        %-------compute posterior update prior for the environment and update mutual information map-------------
-                        obj= updatePosteriorMap(obj, fieldValue, obj.samplingPoints(1,end), obj.samplingPoints(2,end));
-                    end
-                    
-                    previousPosition= obj.robotPosition;
-                    obj.robotPosition=[(bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) (bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2)];
-                    obj.path= [obj.path obj.robotPosition'];
-                    
-                    %------------plot the path followed on the map---------
-                    if PlotOn==1
-                        subplot(3,2,3)
-                        title('Robot path on the field')
-                        plot(previousPosition(1,2),previousPosition(1,1), 'w*')
-                        plot(obj.robotPosition(1,2),obj.robotPosition(1,1), 'r*')
-                        hold on;
-                        drawnow
-                    end
-                    
-                else
-                    %if looking for allowed direction try in decreasing
-                    %order all the direection, if already moved, exit and
-                    %recompute gradient
-                    if i==1
-                        attempt= attempt+1;
-                        %decreasing i and iteration since are increased
-                        %once out of the loop
-                        i=i-1;
-                        obj.iteration= obj.iteration-1;
-                        disp(strcat('!!!!!!!Attempting next direction: ', num2str(attempt)))
-                    else
-                        disp('boundary found... exiting')
-                        boundary= 1;
-                    end
+                bestPositionX= (bestPositionX*obj.gridCoarseness)-floor(obj.gridCoarseness/2);
+                bestPositionY= (bestPositionY*obj.gridCoarseness)-floor(obj.gridCoarseness/2);
+                
+                fieldValue= obj.RField.sampleField(bestPositionX, bestPositionY, obj.gridCoarseness);
+                %-------compute posterior update prior for the environment and update mutual information map-------------
+                obj= updatePosteriorMap(obj, fieldValue, bestPositionX, bestPositionY);
+                
+                previousPosition= obj.robotPosition;
+                obj.robotPosition=[bestPositionX bestPositionY];
+                disp(strcat('current robot position is:', num2str(obj.robotPosition)))
+                obj.path= [obj.path obj.robotPosition'];
+                
+                %------------plot the path followed on the map---------
+                if PlotOn==1
+                    subplot(3,2,3)
+                    title('Robot path on the field')
+                    plot(previousPosition(1,2),previousPosition(1,1), 'w*')
+                    plot(obj.robotPosition(1,2),obj.robotPosition(1,1), 'r*')
+                    hold on;
+                    drawnow
                 end
-                i=i+1;
-                obj.iteration= obj.iteration+ 1;
+                
+            else
+                disp('Weird because the maximum is on a station, no failsafe here!!!')
             end
+            obj.iteration= obj.iteration+ 1;
             %------------update entropy map------------
             obj.entropyMap= updateEntropyMap(obj);
             

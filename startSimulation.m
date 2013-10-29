@@ -2,7 +2,7 @@ function startSimulation(jobID, nSimulations)
 
 close all
 global PlotOn;
-PlotOn= 0;
+PlotOn= 1;
 
 %-------------position of the stations (static sensors)--------------
 stations=[];
@@ -49,32 +49,29 @@ for currentSimulation=1:nSimulations
     end
     
     %-----------------simulation step----------------------
-    while r.distance< 3000
+    while r.iteration< 200
         r= r.flyNextWayPoints();
     end
     %-------------------sample temperature from resulting probability---------------
     sampleTemperatureProbability(r, 1);
     %errorMap= abs(field - temperatureMap);
     
-    xSampled= r.data(3,:);
-    x= 1:3000;
-    RMSEI= interp1(xSampled, r.data(1,:), x);
-    entropyI= interp1(xSampled, r.data(4,:), x);
+    x= r.data(2,:);
     if PlotOn==1
         %---------------plot RMSE values w.r.t. meters
         subplot(3,2,5)
-        plot(x, RMSEI)
+        plot(x, r.data(1,:))
         grid on
         ylabel('RMSE')
-        xlabel('meters')
+        xlabel('# sampling points')
         title('RMSE error')
         
         %-------------------plot entropy values w.r.t. meters-------
         subplot(3,2,6)
-        plot(x, entropyI)
+        plot(x, r.data(4,:))
         grid on
         ylabel('Entropy')
-        xlabel('meters')
+        xlabel('# sampling points')
         title('Total entropy')
     end
     %---------------saves results on file-------------------------
@@ -83,7 +80,7 @@ for currentSimulation=1:nSimulations
     end
     
     FileName= strcat('./results/newSimulationResultJob_', num2str(jobID), '_', num2str(currentSimulation), '.mat');
-    save( FileName, 'RMSEI', 'entropyI','jobID');
+    save( FileName, 'r.data(1,:)', 'r.data(4,:)','jobID');
     
     
 end
