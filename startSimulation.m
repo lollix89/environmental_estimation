@@ -44,7 +44,6 @@ for currentSimulation=1:nSimulations
             plot(stations(i,2),stations(i,1), 'ko')
         end
         drawnow
-        
         hold on;
     end
     

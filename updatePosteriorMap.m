@@ -18,10 +18,8 @@ for x_=1:size(obj.fieldPosterior, 1)
         %currentDistance= pdist([posX posY; (x_*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (y_*obj.gridCoarseness)-floor(obj.gridCoarseness/2)]);
         currentDistance= pdist([discreteCellPositionX discreteCellPositionY; x_ y_]);
 
-        if currentDistance== 0
-            varianceFunction= obj.likelihoodVariance;
-        elseif currentDistance <= obj.RField.Range/obj.gridCoarseness
-            varianceFunction= (sill*(1.5*(currentDistance/(obj.RField.Range/obj.gridCoarseness))-.5*(currentDistance/(obj.RField.Range/obj.gridCoarseness))^3)); 
+        if currentDistance <= obj.RField.Range/obj.gridCoarseness
+            varianceFunction= obj.likelihoodVariance + (sill*(1.5*(currentDistance/(obj.RField.Range/obj.gridCoarseness))-.5*(currentDistance/(obj.RField.Range/obj.gridCoarseness))^3)); 
         else
             varianceFunction=  sill;
         end
