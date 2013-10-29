@@ -9,6 +9,8 @@ end
 
 [~, closestValueIndex] = min(abs(obj.temperatureVector-fieldValue));
 
+sill= 25;
+
 for x_=1:size(obj.fieldPosterior, 1)
     for y_=1:size(obj.fieldPosterior, 2)
         %compute distance from the current position of the robot on the
@@ -16,18 +18,19 @@ for x_=1:size(obj.fieldPosterior, 1)
         %currentDistance= pdist([posX posY; (x_*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (y_*obj.gridCoarseness)-floor(obj.gridCoarseness/2)]);
         currentDistance= pdist([discreteCellPositionX discreteCellPositionY; x_ y_]);
 
-       
-%         if currentDistance <= obj.RField.Range
-%             varianceFunction= obj.likelihoodVariance + (sill*(1.5*(currentDistance/obj.RField.Range)-.5*(currentDistance/obj.RField.Range)^3));     %not sure about summing up the variances
-%         else
-%             varianceFunction=  sill;
-%         end
-
-        if currentDistance <= obj.RField.Range/obj.gridCoarseness
-            varianceFunction= currentDistance+1;
+        if currentDistance== 0
+            varianceFunction= obj.likelihoodVariance;
+        elseif currentDistance <= obj.RField.Range/obj.gridCoarseness
+            varianceFunction= (sill*(1.5*(currentDistance/(obj.RField.Range/obj.gridCoarseness))-.5*(currentDistance/(obj.RField.Range/obj.gridCoarseness))^3)); 
         else
-            varianceFunction=  obj.RField.Range/obj.gridCoarseness;
+            varianceFunction=  sill;
         end
+
+%         if currentDistance <= obj.RField.Range/obj.gridCoarseness
+%             varianceFunction= currentDistance + obj.likelihoodVariance ;
+%         else
+%             varianceFunction=  obj.RField.Range/obj.gridCoarseness;
+%         end
 
         likelihoodCurrentCell= pdf(obj.likelihoodDistribution, obj.temperatureVector, obj.temperatureVector(closestValueIndex), varianceFunction);
         likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);

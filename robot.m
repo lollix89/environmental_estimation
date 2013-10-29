@@ -16,7 +16,6 @@ classdef robot
         robotPosition=[];
         entropyMap=[];
         iteration= 1;
-        gain= 5;
         gridCoarseness= 5;
         GPSCoarseness= 5;
         %For simulating the environment the object Field returns the values
@@ -112,6 +111,7 @@ classdef robot
             
             [bestPositionX bestPositionY]= findBestPosition(obj);
             disp('**************debug************')
+            disp(strcat('Iteration # ', num2str(obj.iteration)))
             disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))
             
             if ~(any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestPositionX bestPositionY] , 'rows')))

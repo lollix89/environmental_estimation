@@ -1,6 +1,5 @@
 function [bestPositionX bestPositionY] = findBestPosition(obj)
 
-    [val, idx]= max(obj.mutualInformationMap(:));
-    val
+    [~, idx]= max(obj.mutualInformationMap(:));
     [bestPositionX, bestPositionY]= ind2sub(size(obj.mutualInformationMap), idx);
 end

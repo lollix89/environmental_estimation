@@ -49,7 +49,7 @@ for currentSimulation=1:nSimulations
     end
     
     %-----------------simulation step----------------------
-    while r.iteration< 200
+    while r.iteration< 150
         r= r.flyNextWayPoints();
     end
     %-------------------sample temperature from resulting probability---------------
@@ -78,9 +78,11 @@ for currentSimulation=1:nSimulations
     if ~exist('./results', 'dir')
         mkdir('./results');
     end
+    RMSE= r.data(1,:);
+    entropy= r.data(4,:);
     
     FileName= strcat('./results/newSimulationResultJob_', num2str(jobID), '_', num2str(currentSimulation), '.mat');
-    save( FileName, 'r.data(1,:)', 'r.data(4,:)','jobID');
+    save( FileName, 'RMSE', 'entropy','jobID');
     
     
 end
