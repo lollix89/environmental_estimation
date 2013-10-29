@@ -109,7 +109,8 @@ classdef robot
                 hold on;
             end
             
-            [bestPositionX bestPositionY]= findBestPosition(obj);
+            bestPositionX = randi([1 obj.fieldExtent(1)/obj.gridCoarseness], 1, 1);
+            bestPositionY= randi([1 obj.fieldExtent(2)/obj.gridCoarseness], 1, 1);
             disp('**************debug************')
             disp(strcat('Iteration # ', num2str(obj.iteration)))
             disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))
@@ -139,7 +140,7 @@ classdef robot
                 end
                 
             else
-                disp('Weird because the maximum is on a station, no failsafe here!!!')
+                disp('In random strategy can happen!!!')
             end
             obj.iteration= obj.iteration+ 1;
             %------------update entropy map------------
