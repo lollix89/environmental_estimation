@@ -9,7 +9,7 @@ classdef robot
         likelihood = [];
         temperatureVector= [];
         likelihoodDistribution= 'norm';
-        likelihoodVariance= .1;
+        likelihoodVariance= .5;
         temperatureRange=[-12,58];
         temperatureInterval= .5;
         fieldExtent;
