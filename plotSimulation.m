@@ -14,11 +14,11 @@ for i=1:length(fileList)
     L.RMSEI=  L.RMSEI(1:sampleFactor:3000);
     
     if mod(L.jobID, 3)== 1
-        shortRange{nRobots}(:, size(shortRange{nRobots}, 2)+1)= L.RMSEI';
+        longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSEI';
     elseif mod(L.jobID, 3)== 2
         mediumRange{nRobots}(:, size(mediumRange{nRobots}, 2)+1)= L.RMSEI';
     else
-        longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSEI';
+        shortRange{nRobots}(:, size(shortRange{nRobots}, 2)+1)= L.RMSEI';
     end
 end
 

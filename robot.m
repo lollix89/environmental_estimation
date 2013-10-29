@@ -97,9 +97,8 @@ classdef robot
             totalEntropy= sum(obj.entropyMap(:));
             %---------------------saving RMSE for comparison-----------------
             temperatureMap= sampleTemperatureProbability(obj, 0);
-            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness), 1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))-...
-                obj.RField.Field(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness),1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))).^2))); ...
-                obj.iteration; obj.distance; totalEntropy];
+            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:end, 1:obj.gridCoarseness:end)-...
+                obj.RField.Field(1:obj.gridCoarseness:end,1:obj.gridCoarseness:end)).^2))); obj.iteration; obj.distance; totalEntropy];
             %-----------plot current entropy--------------------
             if PlotOn== 1
                 subplot(3,2,2)
@@ -133,7 +132,7 @@ classdef robot
                         obj.distance= obj.distance + pdist([obj.samplingPoints(:, end-1)'; obj.samplingPoints(:,end)']);
                         
                         %------------plot the sampling points on the map---------
-                        currentSamplingPoint= obj.samplingPoints(:, end);
+%                        currentSamplingPoint= obj.samplingPoints(:, end);
 %                         if PlotOn==1
 %                             subplot(3,2,3)
 %                             title('Robot path on the field')
@@ -193,6 +192,17 @@ classdef robot
                 drawnow
             end
             %pause
+        end
+        
+        %Simulates the communication between two robots and
+        %updates belief. oss: assumes perfect communication
+        function obj= communicate(obj, otherBelieves, totalRobots)
+            weightFactor= 1/totalRobots;
+            tmpSum= zeros(size(obj.fieldPrior));
+            for neighb= 1:size(otherBelieves,2)
+                tmpSum= tmpSum + (otherBelieves{neighb} - obj.fieldPrior);
+            end
+            obj.fieldPrior= obj.fieldPrior + (weightFactor*tmpSum);
         end
         
         
