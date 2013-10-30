@@ -10,6 +10,7 @@ longRange=cell(nRobots);
 
 for i=1:length(fileList)
     L=load(strcat('./results/', fileList(i).name));
+    L.RMSE= L.RMSE(1:5:end);
     
     if mod(L.jobID, 3)== 1
         longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSE';
@@ -48,7 +49,7 @@ for i=1:nRobots
     legendNames=[legendNames; strcat(num2str(i),' robots')];
 end
 
-plotRangeX = (1:149)';
+plotRangeX = (1:5:149)';
 if ~exist('./plot', 'dir')
     mkdir('./plot');
 end
