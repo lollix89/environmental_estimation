@@ -12,11 +12,11 @@ for i=1:length(fileList)
     L=load(strcat('./results/', fileList(i).name));
     
     if mod(L.jobID, 3)== 1
-        longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSEI';
+        longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSE';
     elseif mod(L.jobID, 3)== 2
-        mediumRange{nRobots}(:, size(mediumRange{nRobots}, 2)+1)= L.RMSEI';
+        mediumRange{nRobots}(:, size(mediumRange{nRobots}, 2)+1)= L.RMSE';
     else
-        shortRange{nRobots}(:, size(shortRange{nRobots}, 2)+1)= L.RMSEI';
+        shortRange{nRobots}(:, size(shortRange{nRobots}, 2)+1)= L.RMSE';
         
     end
 end
