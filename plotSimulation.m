@@ -5,13 +5,11 @@ fileList=dir('./results/newSimulationResultJob_*.mat');
 shortRange=cell(nRobots);
 mediumRange=cell(nRobots);
 longRange=cell(nRobots);
-sampleFactor= 150;
 
 %assume L.currentRMSE is a column vector
 
 for i=1:length(fileList)
     L=load(strcat('./results/', fileList(i).name));
-    L.RMSEI=  L.RMSEI(1:sampleFactor:3000);
     
     if mod(L.jobID, 3)== 1
         longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSEI';
@@ -50,7 +48,7 @@ for i=1:nRobots
     legendNames=[legendNames; strcat(num2str(i),' robots')];
 end
 
-plotRangeX = (1:sampleFactor:3000)';
+plotRangeX = (1:149)';
 if ~exist('./plot', 'dir')
     mkdir('./plot');
 end
@@ -61,7 +59,7 @@ if size(shortRangePlotY,1)~=0
     plot(plotRangeX,shortRangePlotY)
     title('shortRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('Distance (m)')
+    xlabel('# sampling points')
     grid on
     legend(legendNames)
     hold on
@@ -80,7 +78,7 @@ if size(mediumRangePLotY,1)~=0
     plot(plotRangeX,mediumRangePLotY)
     title('mediumRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('Distance (m)')
+    xlabel('# sampling points')
     grid on
     legend(legendNames)
     hold on
@@ -99,7 +97,7 @@ if size(longRangePlotY,1)~=0
     plot(plotRangeX,longRangePlotY)
     title('longRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('Distance (m)')
+    xlabel('# sampling points')
     grid on
     legend(legendNames)
     hold on
@@ -117,7 +115,7 @@ totalFigure=figure();
 plot(plotRangeX,totalPlotY)
 title('total comparison')
 ylabel('RMSE')
-xlabel('Distance (m)')
+xlabel('# sampling points')
 grid on
 legend(legendNames)
 % hold on
