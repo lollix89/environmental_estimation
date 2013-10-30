@@ -2,9 +2,9 @@
 function plotSimulation(nRobots)
 close all
 fileList=dir('./results/newSimulationResultJob_*.mat');
-shortRange=cell(nRobots);
-mediumRange=cell(nRobots);
-longRange=cell(nRobots);
+shortRange=cell(1,nRobots);
+mediumRange=cell(1,nRobots);
+longRange=cell(1,nRobots);
 
 %assume L.currentRMSE is a column vector
 
@@ -13,12 +13,11 @@ for i=1:length(fileList)
     L.RMSE= L.RMSE(1:5:end);
     
     if mod(L.jobID, 3)== 1
-        longRange{nRobots}(:, size(longRange{nRobots}, 2)+1)= L.RMSE';
+        longRange{1,nRobots}(:, size(longRange{1,nRobots}, 2)+1)= L.RMSE';
     elseif mod(L.jobID, 3)== 2
-        mediumRange{nRobots}(:, size(mediumRange{nRobots}, 2)+1)= L.RMSE';
+        mediumRange{1,nRobots}(:, size(mediumRange{1,nRobots}, 2)+1)= L.RMSE';
     else
-        shortRange{nRobots}(:, size(shortRange{nRobots}, 2)+1)= L.RMSE';
-        
+        shortRange{1,nRobots}(:, size(shortRange{1,nRobots}, 2)+1)= L.RMSE';    
     end
 end
 
@@ -34,14 +33,14 @@ legendNames=[];
 
 
 for i=1:nRobots
-    shortRangePlotY= [shortRangePlotY mean(shortRange{i},2)];
-    shortRangeSTD= [shortRangeSTD std(shortRange{i},1,2)];
+    shortRangePlotY= [shortRangePlotY mean(shortRange{1,i},2)];
+    shortRangeSTD= [shortRangeSTD std(shortRange{1,i},1,2)];
     
-    mediumRangePLotY= [mediumRangePLotY mean(mediumRange{i},2)];
-    mediumRangeSTD= [mediumRangeSTD std(mediumRange{i},1,2)];
+    mediumRangePLotY= [mediumRangePLotY mean(mediumRange{1,i},2)];
+    mediumRangeSTD= [mediumRangeSTD std(mediumRange{1,i},1,2)];
     
-    longRangePlotY= [longRangePlotY mean(longRange{i},2)];
-    longRangeSTD=[longRangeSTD std(longRange{i},1,2)];
+    longRangePlotY= [longRangePlotY mean(longRange{1,i},2)];
+    longRangeSTD=[longRangeSTD std(longRange{1,i},1,2)];
     
     totalPlotY=[totalPlotY mean([shortRangePlotY(:,end) mediumRangePLotY(:,end) longRangePlotY(:,end)],2)];
     totalPlotSTD= [totalPlotSTD std([shortRangePlotY(:,end) mediumRangePLotY(:,end) longRangePlotY(:,end)],1,2)];
