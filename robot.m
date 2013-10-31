@@ -109,7 +109,7 @@ classdef robot
             
             [bestPositionX bestPositionY]= findBestPosition(obj);
             %disp('**************debug************')
-            disp(strcat('Iteration # ', num2str(obj.iteration)))
+            %disp(strcat('Iteration # ', num2str(obj.iteration)))
             %disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))
             
             if ~(any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestPositionX bestPositionY] , 'rows')))
@@ -123,7 +123,7 @@ classdef robot
                 
                 previousPosition= obj.robotPosition;
                 obj.robotPosition=[bestPositionX bestPositionY];
-                disp(strcat('current robot position is:', num2str(obj.robotPosition)))
+                %disp(strcat('current robot position is:', num2str(obj.robotPosition)))
                 obj.path= [obj.path obj.robotPosition'];
                 
                 %------------plot the path followed on the map---------
