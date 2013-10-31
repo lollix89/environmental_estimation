@@ -3,3 +3,6 @@
 #ignore *.m~ files
 *.m~
 .DS_Store
+*plot*
+*result*
+*.gz
