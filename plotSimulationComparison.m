@@ -55,8 +55,8 @@ for j=1:ComparisonNumber
     end
 end
 
-legendNames{1}= 'coarseness=5 gain=5';
-legendNames{2}= 'coarseness=5 gain=1';
+legendNames{1}= 'coarseness=5 gain=5 fucntion of spherical model';
+legendNames{2}= 'coarseness=5 gain=5 function of distance';
 
 plotRangeX = (1:sampleFactor:3000)';
 if ~exist('./plot', 'dir')
@@ -64,7 +64,11 @@ if ~exist('./plot', 'dir')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if isempty(shortRangePlotY{1})~=1
+if isempty(shortRangePlotY{1})~=1 && isempty(shortRangePlotY{2})~=1
+    
+    size(shortRangePlotY{1})
+    size(shortRangePlotY{2})
+
     
     shortRangePlotY= cell2mat(shortRangePlotY);
     shortRangeSTD= cell2mat(shortRangeSTD);
