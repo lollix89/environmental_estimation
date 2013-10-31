@@ -34,7 +34,7 @@ for currentSimulation=1:nSimulations
     
     %--------------------initialize object robot--------------------
     r = robot(rF, stations);
-    %-----------------plot selected field---------------------
+    %-----------------plot field---------------------
     if PlotOn==1
         figure(1)
         subplot(3,2,3)

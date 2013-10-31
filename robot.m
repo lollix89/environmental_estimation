@@ -11,7 +11,7 @@ classdef robot
         likelihoodDistribution= 'norm';
         likelihoodVariance= .5;
         temperatureRange=[-12,58];
-        temperatureInterval= .5;
+        temperatureInterval= .01;
         fieldExtent;
         robotPosition=[];
         entropyMap=[];
@@ -76,8 +76,6 @@ classdef robot
             obj= initializePriorDistribution(obj);
             %----------------initialize mutualInformationMap---------------
             obj.mutualInformationMap= 30.*ones(ceil(obj.fieldExtent(1)/obj.gridCoarseness),ceil(obj.fieldExtent(2)/obj.gridCoarseness));
-            %---------------initialize entropy map-------------------------
-            obj.entropyMap= updateEntropyMap(obj);
             %------------sample field at current position and at eventually present stations-------------
             obj.stations(end+1,:)= obj.robotPosition;
             for idx=1:size(obj.stations,1)
@@ -85,8 +83,8 @@ classdef robot
                 %compute posterior update prior for the environment and update
                 %mutual information map
                 obj= updatePosteriorMap(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
-                obj.entropyMap= updateEntropyMap(obj);
             end
+            obj.entropyMap= updateEntropyMap(obj);   
             obj.stations= obj.stations(1:end-1,:);
             obj.samplingPoints= [obj.robotPosition(1); obj.robotPosition(2)];
         end
