@@ -16,8 +16,8 @@ classdef robot
         robotPosition=[];
         entropyMap=[];
         iteration= 1;
-        gridCoarseness= 5;
-        GPSCoarseness= 5;
+        gridCoarseness= 2;
+        GPSCoarseness= 2;
         %For simulating the environment the object Field returns the values
         %of the field
         RField;
