@@ -11,7 +11,7 @@ classdef robot
         likelihoodDistribution= 'norm';
         likelihoodVariance= .5;
         temperatureRange=[-12,58];
-        temperatureInterval= .01;
+        temperatureInterval= .1;
         fieldExtent;
         robotPosition=[];
         entropyMap=[];
@@ -72,7 +72,7 @@ classdef robot
             %---------------create temperatureVector------------------
             obj.temperatureVector= (obj.temperatureRange(1):obj.temperatureInterval:obj.temperatureRange(2));
             %-------------initialize probabilities distributions----------
-            obj= initializeLikelihood(obj);
+            %obj= initializeLikelihood(obj);
             obj= initializePriorDistribution(obj);
             %----------------initialize mutualInformationMap---------------
             obj.mutualInformationMap= 30.*ones(ceil(obj.fieldExtent(1)/obj.gridCoarseness),ceil(obj.fieldExtent(2)/obj.gridCoarseness));
