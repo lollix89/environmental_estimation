@@ -73,7 +73,7 @@ if isempty(shortRangePlotY{1})~=1
     plot(plotRangeX,shortRangePlotY)
     title('ShortRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('# sampling points')
+    xlabel('meters')
     grid on
     legend(legendNames)
     hold on
@@ -94,7 +94,7 @@ if isempty(mediumRangePLotY{1})~=1
     plot(plotRangeX,mediumRangePLotY)
     title('MediumRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('# sampling points')
+    xlabel('meters')
     grid on
     legend(legendNames)
     hold on
@@ -115,7 +115,7 @@ if isempty(longRangePlotY{1})~=1
     plot(plotRangeX,longRangePlotY)
     title('longRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('# sampling points')
+    xlabel('meters')
     grid on
     legend(legendNames)
     hold on
@@ -134,7 +134,7 @@ totalPlotY= cell2mat(totalPlotY);
 plot(plotRangeX,totalPlotY)
 title('total comparison')
 ylabel('RMSE')
-xlabel('# sampling points')
+xlabel('meters')
 grid on
 legend(legendNames)
 hold off
