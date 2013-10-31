@@ -33,7 +33,7 @@ classdef robot
         %tInterval is the coarseness of values
         %lDistribution is the distribution probability of P(y|x)
         
-        function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
+         function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
             nargin
             if nargin == 0
                 disp('This constructor requires at least one argument!!')
@@ -71,12 +71,10 @@ classdef robot
             %---------------create temperatureVector------------------
             obj.temperatureVector= (obj.temperatureRange(1):obj.temperatureInterval:obj.temperatureRange(2));
             %-------------initialize probabilities distributions----------
-            obj= initializeLikelihood(obj);
+            %obj= initializeLikelihood(obj);
             obj= initializePriorDistribution(obj);
             %----------------initialize mutualInformationMap---------------
             obj.mutualInformationMap= 30.*ones(ceil(obj.fieldExtent(1)/obj.gridCoarseness),ceil(obj.fieldExtent(2)/obj.gridCoarseness));
-            %---------------initialize entropy map-------------------------
-            obj.entropyMap= updateEntropyMap(obj);
             %------------sample field at current position and at eventually present stations-------------
             obj.stations(end+1,:)= obj.robotPosition;
             for idx=1:size(obj.stations,1)
@@ -84,8 +82,8 @@ classdef robot
                 %compute posterior update prior for the environment and update
                 %mutual information map
                 obj= updatePosteriorMap(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
-                obj.entropyMap= updateEntropyMap(obj);
             end
+            obj.entropyMap= updateEntropyMap(obj);   
             obj.stations= obj.stations(1:end-1,:);
             obj.samplingPoints= [obj.robotPosition(1); obj.robotPosition(2)];
         end
