@@ -1,8 +1,9 @@
-function startSimulation(jobID, nSimulations)
+function startSimulation(jobID, nRobots, nSimulations)
 
 close all
 global PlotOn;
 PlotOn= 1;
+robots= robot.empty(nRobots, 0);
 
 %-------------position of the stations (static sensors)--------------
 stations=[];
@@ -32,13 +33,15 @@ for currentSimulation=1:nSimulations
     %--------------------initialize field-------------------------
     rF= randomField(field,range);
     
-    %--------------------initialize object robot--------------------
-    r = robot(rF, stations);
+    %--------------------initialize robot objects--------------------
+    for robotID=1:nRobots
+        robots(robotID) = robot(rF, robotID, stations );
+    end
     %----------------------plot field---------------------
     if PlotOn==1
         figure(1)
         subplot(3,2,3)
-        imagesc(r.RField.Field)
+        imagesc(rF.Field)
         hold on;
         for i=1:size(stations,1)
             plot(stations(i,2),stations(i,1), 'ko')
@@ -47,7 +50,7 @@ for currentSimulation=1:nSimulations
         
         hold on;
     end
-    
+    pause
     %-----------------simulation step----------------------
     while r.distance< 3000
         r= r.flyNextWayPoints();

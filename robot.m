@@ -1,5 +1,6 @@
 classdef robot
     properties
+        ID;
         mutualInformationMap;
         path=[]
         samplingPoints=[];
@@ -34,22 +35,22 @@ classdef robot
         %tInterval is the coarseness of values
         %lDistribution is the distribution probability of P(y|x)
         
-        function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
-            nargin
-            if nargin == 0
-                disp('This constructor requires at least one argument!!')
-            elseif nargin > 0
+        function obj = robot(rField, robotID, staticStations, lVariance, tRange, tInterval, lDistribution)           
+            if nargin <= 1
+                disp('This constructor requires at least two arguments!!')
+            elseif nargin > 1
                 obj.RField= rField;
                 obj.fieldExtent= size(obj.RField.Field);
-                if nargin > 1
+                obj.ID= robotID;
+                if nargin > 2
                     obj.stations= staticStations;
-                    if nargin > 2
+                    if nargin > 3
                         obj.likelihoodVariance = lVariance;
-                        if nargin > 3
+                        if nargin > 4
                             obj.temperatureRange   = tRange;
-                            if nargin > 4
+                            if nargin > 5
                                 obj.temperatureInterval    = tInterval;
-                                if nargin > 5
+                                if nargin > 6
                                     obj.likelihoodDistribution  = lDistribution;
                                 end
                             end
@@ -87,6 +88,8 @@ classdef robot
             obj.entropyMap= updateEntropyMap(obj);   
             obj.stations= obj.stations(1:end-1,:);
             obj.samplingPoints= [obj.robotPosition(1); obj.robotPosition(2)];
+            
+            disp(['Initialized robot ' num2str(obj.ID)])
         end
         
         %------------flies around the environment-----------------
