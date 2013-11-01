@@ -161,7 +161,7 @@ classdef robot
                     %if looking for allowed direction try in decreasing
                     %order all the direection, if already moved, exit and
                     %recompute gradient
-                    if i==1
+                    if i==0
                         attempt= attempt+1;
                         %decreasing i and iteration since are increased
                         %once out of the loop
