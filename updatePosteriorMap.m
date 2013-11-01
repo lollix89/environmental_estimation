@@ -12,7 +12,7 @@ else
 end
 
 [~, closestValueIndex] = min(abs(obj.temperatureVector-fieldValue));
-sill= 25;
+%sill= 25;
 
 for x_=1:size(obj.fieldPosterior, 1)
     for y_=1:size(obj.fieldPosterior, 2)

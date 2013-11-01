@@ -46,14 +46,33 @@ for currentSimulation=1:nSimulations
         for i=1:size(stations,1)
             plot(stations(i,2),stations(i,1), 'ko')
         end
-        drawnow
-        
+        drawnow    
         hold on;
     end
-    pause
+    
     %-----------------simulation step----------------------
-    while r.distance< 3000
-        r= r.flyNextWayPoints();
+    while sum([robots.distance])< 3000
+        for robotID=1:nRobots
+            robots(robotID)= robots(robotID).flyNextWayPoints();
+        end
+        disp('**********starting communnication phase!!!')
+        for id1=1:nRobots
+            disp(['>>>>> robot ' id1 ' is receiving updates from other robots'])
+            believesMap= cell(nRobots-1, 1);        %contains the believes of all the other robots (simulates a perfect communication channel lossless)
+            idx= 1;
+            for id2=1:nRobots
+                if id1~= id2
+                    believesMap{idx,1}= robots(id2).fieldPosterior;
+                    idx= idx+ 1;
+                    disp(['communicating with robot ' id2])
+                else
+                    break
+                end
+            end
+            disp(['robot ' id1 ' updating its belief'])
+            robots(id1)= robots(id1).communicate(believesMap, nRobots);
+        end
+        
     end
     %-------------------sample temperature from resulting probability---------------
     sampleTemperatureProbability(r, 1);

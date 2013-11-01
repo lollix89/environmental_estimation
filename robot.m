@@ -88,7 +88,6 @@ classdef robot
             obj.entropyMap= updateEntropyMap(obj);   
             obj.stations= obj.stations(1:end-1,:);
             obj.samplingPoints= [obj.robotPosition(1); obj.robotPosition(2)];
-            
             disp(['Initialized robot ' num2str(obj.ID)])
         end
         
@@ -192,7 +191,6 @@ classdef robot
                 title('Mutual information map')
                 drawnow
             end
-            %pause
         end
         
         %Simulates the communication between two robots and
