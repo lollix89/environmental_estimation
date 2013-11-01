@@ -198,7 +198,7 @@ classdef robot
         function obj= communicate(obj, otherBelieves, totalRobots)
             weightFactor= 1/totalRobots;
             tmpSum= zeros(size(obj.fieldPrior));
-            for neighb= 1:size(otherBelieves,2)
+            for neighb= 1:totalRobots-1
                 tmpSum= tmpSum + (otherBelieves{neighb} - obj.fieldPrior);
             end
             obj.fieldPrior= obj.fieldPrior + (weightFactor*tmpSum);

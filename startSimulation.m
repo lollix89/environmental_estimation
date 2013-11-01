@@ -57,23 +57,23 @@ for currentSimulation=1:nSimulations
         end
         disp('**********starting communnication phase!!!')
         for id1=1:nRobots
-            disp(['>>>>> robot ' id1 ' is receiving updates from other robots'])
+            disp(['>>>>> robot ' num2str(id1) ' is receiving updates from other robots'])
             believesMap= cell(nRobots-1, 1);        %contains the believes of all the other robots (simulates a perfect communication channel lossless)
             idx= 1;
             for id2=1:nRobots
                 if id1~= id2
                     believesMap{idx,1}= robots(id2).fieldPosterior;
                     idx= idx+ 1;
-                    disp(['communicating with robot ' id2])
-                else
-                    break
+                    disp(['communicating with robot ' num2str(id2)])
                 end
             end
-            disp(['robot ' id1 ' updating its belief'])
+            disp(['robot ' num2str(id1) ' updating its belief'])
             robots(id1)= robots(id1).communicate(believesMap, nRobots);
         end
         
     end
+    
+    pause
     %-------------------sample temperature from resulting probability---------------
     sampleTemperatureProbability(r, 1);
     %errorMap= abs(field - temperatureMap);
