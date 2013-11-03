@@ -2,12 +2,12 @@ function startSimulation(jobID, nSimulations)
 
 close all
 global PlotOn;
-PlotOn= 1;
+PlotOn= 0;
 
 %-------------position of the stations (static sensors)--------------
 stations=[];
-stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
-stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
+% stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
+% stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
 %--------------start simulation
 for currentSimulation=1:nSimulations
     

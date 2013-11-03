@@ -96,6 +96,7 @@ classdef robot
             temperatureMap= sampleTemperatureProbability(obj, 0);
             obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:end, 1:obj.gridCoarseness:end)-...
                 obj.RField.Field(1:obj.gridCoarseness:end,1:obj.gridCoarseness:end)).^2))); obj.iteration; obj.distance; totalEntropy];
+            obj.data(1, :)
             %-----------plot current entropy--------------------
             if PlotOn== 1
                 subplot(3,2,2)
