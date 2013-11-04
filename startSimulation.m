@@ -14,14 +14,16 @@ for currentSimulation=1:nSimulations
     %---------------Load a random field---------------
     if isdir('./RandomFields')
         fieldNum= randi([1 100]);
-        
         if mod(jobID, 3)== 1
+            fieldValue= 200+fieldNum;
             field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
             range= 100;
         elseif mod(jobID,3)== 2
+            fieldValue= 100+fieldNum;
             field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
             range= 50;
         else
+            fieldValue= fieldNum;
             field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
             range= 10;
         end
@@ -31,9 +33,6 @@ for currentSimulation=1:nSimulations
     
     %--------------------initialize field-------------------------
     rF= randomField(field,range);
-    
-    
-    
     %--------------------initialize object robot--------------------
     r = robot(rF, stations);
     %----------------------plot field---------------------
@@ -51,12 +50,13 @@ for currentSimulation=1:nSimulations
     end
     
     %-----------------simulation step----------------------
-    while r.distance< 3000
+    while r.distance< 3020
         r= r.flyNextWayPoints();
     end
     %-------------------sample temperature from resulting probability---------------
     sampleTemperatureProbability(r, 1);
     %errorMap= abs(field - temperatureMap);
+    disp(['>>jobID: ' num2str(jobID) ' worked on field ' num2str(fieldValue) '. RMSE values: ' num2str(r.data(1,:)) ])
     
     xSampled= r.data(3,:);
     x= 1:3000;
@@ -84,8 +84,9 @@ for currentSimulation=1:nSimulations
         mkdir('./results');
     end
     
+    
     FileName= strcat('./results/newSimulationResultJob_', num2str(jobID), '_', num2str(currentSimulation), '.mat');
-    save( FileName, 'RMSEI', 'entropyI','jobID');
+    save( FileName, 'RMSEI', 'entropyI','jobID', 'fieldValue');
     
     
 end

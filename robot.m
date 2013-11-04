@@ -35,7 +35,6 @@ classdef robot
         %lDistribution is the distribution probability of P(y|x)
         
         function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
-            nargin
             if nargin == 0
                 disp('This constructor requires at least one argument!!')
             elseif nargin > 0
@@ -96,7 +95,6 @@ classdef robot
             temperatureMap= sampleTemperatureProbability(obj, 0);
             obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:end, 1:obj.gridCoarseness:end)-...
                 obj.RField.Field(1:obj.gridCoarseness:end,1:obj.gridCoarseness:end)).^2))); obj.iteration; obj.distance; totalEntropy];
-            obj.data(1, :)
             %-----------plot current entropy--------------------
             if PlotOn== 1
                 subplot(3,2,2)
@@ -169,7 +167,7 @@ classdef robot
                         obj.iteration= obj.iteration-1;
                         disp(strcat('!!!!!!!Attempting next direction: ', num2str(attempt)))
                     else
-                        disp('boundary found... exiting')
+                        %disp('boundary found... exiting')
                         boundary= 1;
                     end
                 end
