@@ -23,7 +23,7 @@ for currentSimulation=1:nSimulations
             fieldValue= 100+fieldNum;
             field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
             range= 50;
-randn        else
+        else
             fieldValue= fieldNum;
             field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
             range= 10;
