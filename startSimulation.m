@@ -13,8 +13,8 @@ for currentSimulation=1:nSimulations
     
     %---------------Load a random field---------------
     if isdir('./RandomFields')
+        RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
         fieldNum= randi([1 100]);
-        
         if mod(jobID, 3)== 1
             fieldValue= 200+fieldNum;
             field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);

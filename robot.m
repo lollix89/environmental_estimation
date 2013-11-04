@@ -16,8 +16,8 @@ classdef robot
         robotPosition=[];
         entropyMap=[];
         iteration= 1;
-        gridCoarseness= 2;
-        GPSCoarseness= 2;
+        gridCoarseness= 5;
+        GPSCoarseness= 5;
         %For simulating the environment the object Field returns the values
         %of the field
         RField;
@@ -123,7 +123,7 @@ classdef robot
                 
                 previousPosition= obj.robotPosition;
                 obj.robotPosition=[bestPositionX bestPositionY];
-                disp(strcat('current robot position is:', num2str(obj.robotPosition)))
+                %disp(strcat('current robot position is:', num2str(obj.robotPosition)))
                 obj.path= [obj.path obj.robotPosition'];
                 
                 %------------plot the path followed on the map---------
@@ -136,8 +136,8 @@ classdef robot
                     drawnow
                 end
                 
-            else
-                disp('In random strategy can happen!!!')
+%             else
+%                 disp('In random strategy can happen!!!')
             end
             obj.iteration= obj.iteration+ 1;
             %------------update entropy map------------
