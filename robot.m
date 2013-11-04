@@ -106,7 +106,7 @@ classdef robot
                 hold on;
             end
             
-            [bestPositionX bestPositionY]= findBestPosition(obj);
+            [bestPositionX, bestPositionY]= findBestPosition(obj);
             %disp('**************debug************')
             %disp(strcat('Iteration # ', num2str(obj.iteration)))
             %disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))

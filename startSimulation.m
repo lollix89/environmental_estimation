@@ -51,7 +51,7 @@ for currentSimulation=1:nSimulations
     end
     
     %-----------------simulation step----------------------
-    while r.iteration< 2
+    while r.iteration< 150
         r= r.flyNextWayPoints();
     end
     %-------------------sample temperature from resulting probability---------------
