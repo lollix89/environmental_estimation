@@ -2,12 +2,12 @@ function startSimulation(jobID, nSimulations)
 
 close all
 global PlotOn;
-PlotOn= 1;
+PlotOn= 0;
 
 %-------------position of the stations (static sensors)--------------
 stations=[];
-stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
-stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
+% stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
+% stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
 %--------------start simulation
 for currentSimulation=1:nSimulations
     
@@ -16,12 +16,15 @@ for currentSimulation=1:nSimulations
         fieldNum= randi([1 100]);
         
         if mod(jobID, 3)== 1
+            fieldValue= 200+fieldNum;
             field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
             range= 100;
         elseif mod(jobID,3)== 2
+            fieldValue= 100+fieldNum;
             field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
             range= 50;
         else
+            fieldValue= fieldNum;
             field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
             range= 10;
         end
@@ -54,6 +57,7 @@ for currentSimulation=1:nSimulations
     %-------------------sample temperature from resulting probability---------------
     sampleTemperatureProbability(r, 1);
     %errorMap= abs(field - temperatureMap);
+    disp(['jobID: ' num2str(jobID) ' worked on field ' num2str(fieldValue) '. RMSE values: ' num2str(r.data(1,:))])
     
     x= r.data(2,:);
     if PlotOn==1
@@ -81,7 +85,7 @@ for currentSimulation=1:nSimulations
     entropy= r.data(4,:);
     
     FileName= strcat('./results/newSimulationResultJob_', num2str(jobID), '_', num2str(currentSimulation), '.mat');
-    save( FileName, 'RMSE', 'entropy','jobID');
+    save( FileName, 'RMSE', 'entropy','jobID', 'fieldValue');
     
     
 end

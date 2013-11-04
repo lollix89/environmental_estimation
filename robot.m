@@ -34,7 +34,6 @@ classdef robot
         %lDistribution is the distribution probability of P(y|x)
         
          function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
-            nargin
             if nargin == 0
                 disp('This constructor requires at least one argument!!')
             elseif nargin > 0
@@ -109,9 +108,9 @@ classdef robot
             
             bestPositionX = randi([1 obj.fieldExtent(1)/obj.gridCoarseness], 1, 1);
             bestPositionY= randi([1 obj.fieldExtent(2)/obj.gridCoarseness], 1, 1);
-            disp('**************debug************')
-            disp(strcat('Iteration # ', num2str(obj.iteration)))
-            disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))
+%             disp('**************debug************')
+%             disp(strcat('Iteration # ', num2str(obj.iteration)))
+%             disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))
             
             if ~(any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestPositionX bestPositionY] , 'rows')))
                 
