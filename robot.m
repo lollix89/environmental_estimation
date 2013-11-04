@@ -34,7 +34,6 @@ classdef robot
         %lDistribution is the distribution probability of P(y|x)
         
        function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
-            nargin
             if nargin == 0
                 disp('This constructor requires at least one argument!!')
             elseif nargin > 0
@@ -136,8 +135,8 @@ classdef robot
                     drawnow
                 end
                 
-            else
-                disp('Weird because the maximum is on a station, no failsafe here!!!')
+            %else
+                %disp('Weird because the maximum is on a station, no failsafe here!!!')
             end
             obj.iteration= obj.iteration+ 1;
             %------------update entropy map------------
