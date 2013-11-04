@@ -31,6 +31,7 @@ for currentSimulation=1:nSimulations
         error('Directory does not exist!!!')
     end
     
+    disp(['---->jobID ' num2str(jobID) ' works on field ' num2str(fieldValue)])
     %--------------------initialize field-------------------------
     rF= randomField(field,range);
     %--------------------initialize object robot--------------------
