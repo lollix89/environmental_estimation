@@ -1,11 +1,12 @@
 
-function plotSimulationComparison(nRobots, ComparisonNumber)
+function plotSimulationComparison(nRobots, folders)
 close all
 
 fileList={};
+ComparisonNumber= size(folders,2);
 
 for i=1: ComparisonNumber
-    fileList{i}= dir(strcat('./results', num2str(i), '/newSimulationResultJob_*.mat'));
+    fileList{i}= dir(strcat('./', folders{i}, '/newSimulationResultJob_*.mat'));
 end
 
 shortRange=cell(ComparisonNumber,nRobots);
@@ -16,7 +17,7 @@ sampleFactor= 150;
 %assume L.currentRMSE is a column vector
 for j=1: ComparisonNumber
     for i=1:length(fileList{j})
-        L=load(strcat('./results', num2str(j),'/', fileList{j}(i).name));
+        L=load(strcat('./', folders{j},'/', fileList{j}(i).name));
         L.RMSEI=  L.RMSEI(1:sampleFactor:3000);   
         
         if mod(L.jobID, 3)== 1
