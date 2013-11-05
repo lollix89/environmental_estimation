@@ -56,8 +56,8 @@ for j=1:ComparisonNumber
     end
 end
 
-legendNames{1}= 'coarseness=5 gain=5 fucntion of spherical model';
-legendNames{2}= 'coarseness=5 gain=5 function of distance';
+legendNames{1}= 'coarseness=2 gain=5 fucntion of distance';
+legendNames{2}= 'coarseness=2 gain=1 function of distance';
 
 plotRangeX = (1:sampleFactor:3000)';
 if ~exist('./plot', 'dir')

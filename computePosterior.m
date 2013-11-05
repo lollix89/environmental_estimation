@@ -6,9 +6,9 @@ posterior= (likelihoodDistribution.*reshape(obj.fieldPrior(x,y,:), 1, size(obj.t
 
 obj.fieldPosterior(x,y,:)= reshape(posterior, 1,1, size(obj.temperatureVector,2));
 
-%update mutual information!!
+%***********************update mutual information!!
 obj= updateMutualInformation(obj, x, y);
-%update prior with computed posterior
+%***********************update prior with computed posterior
 obj.fieldPrior(x,y,:)= obj.fieldPosterior(x,y,:);
 %
 end

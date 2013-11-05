@@ -16,9 +16,10 @@ classdef robot
         robotPosition=[];
         entropyMap=[];
         iteration= 1;
-        gain= 5;
         gridCoarseness= 5;
         GPSCoarseness= 5;
+        velocity= 2.5;
+        sampleFr= 1; %1 sample every second
         %For simulating the environment the object Field returns the values
         %of the field
         RField;
@@ -35,9 +36,7 @@ classdef robot
         %lDistribution is the distribution probability of P(y|x)
         
         function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
-            if nargin == 0
-                disp('This constructor requires at least one argument!!')
-            elseif nargin > 0
+            if nargin > 0
                 obj.RField= rField;
                 obj.fieldExtent= size(obj.RField.Field);
                 if nargin > 1
@@ -77,12 +76,12 @@ classdef robot
             %------------sample field at current position and at eventually present stations-------------
             obj.stations(end+1,:)= obj.robotPosition;
             for idx=1:size(obj.stations,1)
-                fieldValue= obj.RField.sampleField(obj.stations(idx,1),obj.stations(idx,2), obj.gridCoarseness);
+                fieldValue= obj.RField.sampleField(obj.stations(idx,1),obj.stations(idx,2));
                 %compute posterior update prior for the environment and update
                 %mutual information map
                 obj= updatePosteriorMap(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
             end
-            obj.entropyMap= updateEntropyMap(obj);   
+            obj.entropyMap= updateEntropyMap(obj);
             obj.stations= obj.stations(1:end-1,:);
             obj.samplingPoints= [obj.robotPosition(1); obj.robotPosition(2)];
         end
@@ -104,41 +103,65 @@ classdef robot
                 plot(obj.iteration, totalEntropy, 'r-')
                 hold on;
             end
+            %-----------find best direction according to mutual information
+            %map gradient
             bestDirection= findBestDirection(obj);
-            %----------gain controls how many cells the robot moves in that
-            %direction
-            %before recomputing the best trajectory----------------
-            i= 0;
-            boundary= 0;
             attempt= 1;
-            while i< obj.gain && boundary== 0
+            moved= 0;
+            while moved== 0       
+                %----------velocity controls how many times the robot can sample on the way to the next wayPoint---------------
                 bestWaypointX= ceil(obj.robotPosition(1)/obj.GPSCoarseness) + bestDirection(1,attempt);
                 bestWaypointY= ceil(obj.robotPosition(2)/obj.GPSCoarseness) + bestDirection(2,attempt);
                 
                 if bestWaypointX >0 && bestWaypointX <= obj.fieldExtent(1)/obj.GPSCoarseness && bestWaypointY >0 && bestWaypointY <= obj.fieldExtent(2)/obj.GPSCoarseness ...
                         && ~(any(ismember(ceil(obj.stations./obj.GPSCoarseness), [bestWaypointX bestWaypointY] , 'rows')))
                     
-                    %-------once i m here i know all the moves are legal----
-                    for samplePoint= 1: obj.GPSCoarseness/obj.gridCoarseness
-                        %--------sampling points on the way to the next waypoint ----
-                        bestCellX= ceil(obj.samplingPoints(1,end)/obj.gridCoarseness) + bestDirection(1,attempt);
-                        bestCellY= ceil(obj.samplingPoints(2,end)/obj.gridCoarseness) + bestDirection(2,attempt);
+                    %-------now i know all the moves are legal----
+                    a=(bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2);
+                    b=(bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2);
+                    
+                    wayPointDistance= pdist([obj.robotPosition(1) obj.robotPosition(2); (bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) (bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2)]);
+                    distOneSample= obj.sampleFr* obj.velocity;
+                    startDist = obj.distance;
+                    
+                    %-------check for some gap distance remained the
+                    %previous iteration
+                    gapDistance= 0;
+                    if obj.robotPosition(1)- obj.samplingPoints(1,end) ~= 0 || obj.robotPosition(2)- obj.samplingPoints(2,end) ~= 0
+                        gapDistance= pdist([obj.robotPosition(1) obj.robotPosition(2); obj.samplingPoints(1,end) obj.samplingPoints(2,end)]);
+                    end
+                    dirX= (bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) - obj.robotPosition(1);
+                    dirY= (bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) - obj.robotPosition(2);
+                    while  obj.distance- startDist <=  wayPointDistance
+
+                        distNextSample= distOneSample- gapDistance;
+                        gapDistance= 0;
+                        %--------sample points on the way to the next waypoint ----
+                        if bestDirection(1,attempt) ~= 0
+                            distanceX= ceil(distNextSample* cos(atan(abs(dirY)/abs(dirX))));
+                            distanceY= ceil(distNextSample* sin(atan(abs(dirY)/abs(dirX))));
+                        else
+                            distanceX= 0;
+                            distanceY= distNextSample;
+                        end
+                        sampleX= obj.samplingPoints(1,end) + bestDirection(1,attempt)* distanceX;
+                        sampleY= obj.samplingPoints(2,end) + bestDirection(2,attempt)* distanceY;
                         
-                        obj.samplingPoints= [obj.samplingPoints [(bestCellX*obj.gridCoarseness)-floor(obj.gridCoarseness/2) (bestCellY*obj.gridCoarseness)-floor(obj.gridCoarseness/2)]'];
-                        obj.distance= obj.distance + pdist([obj.samplingPoints(:, end-1)'; obj.samplingPoints(:,end)']);
+                        obj.samplingPoints= [obj.samplingPoints [sampleX sampleY]'];
+                        obj.distance= obj.distance + distNextSample;
                         
                         %------------plot the sampling points on the map---------
-%                        currentSamplingPoint= obj.samplingPoints(:, end);
-%                         if PlotOn==1
-%                             subplot(3,2,3)
-%                             title('Robot path on the field')
-%                             plot(currentSamplingPoint(2,1),currentSamplingPoint(1,1), 'k+')
-%                             hold on;
-%                             drawnow
-%                         end
-                        fieldValue= obj.RField.sampleField(obj.samplingPoints(1,end),obj.samplingPoints(2,end), obj.gridCoarseness);
+                        %                        currentSamplingPoint= obj.samplingPoints(:, end);
+                        %                         if PlotOn==1
+                        %                             subplot(3,2,3)
+                        %                             title('Robot path on the field')
+                        %                             plot(currentSamplingPoint(2,1),currentSamplingPoint(1,1), 'k+')
+                        %                             hold on;
+                        %                             drawnow
+                        %                         end
+                        fieldValue= obj.RField.sampleField(sampleX, sampleY);
                         %-------compute posterior update prior for the environment and update mutual information map-------------
-                        obj= updatePosteriorMap(obj, fieldValue, obj.samplingPoints(1,end), obj.samplingPoints(2,end));
+                        obj= updatePosteriorMap(obj, fieldValue, sampleX, sampleY);
                     end
                     
                     previousPosition= obj.robotPosition;
@@ -154,26 +177,17 @@ classdef robot
                         hold on;
                         drawnow
                     end
-                    
+                    moved= 1;
                 else
-                    %if looking for allowed direction try in decreasing
+                    %if looking for allowed direction try in incresing
                     %order all the direection, if already moved, exit and
-                    %recompute gradient
-                    if i==0
-                        attempt= attempt+1;
-                        %decreasing i and iteration since are increased
-                        %once out of the loop
-                        i=i-1;
-                        obj.iteration= obj.iteration-1;
-                        disp(strcat('!!!!!!!Attempting next direction: ', num2str(attempt)))
-                    else
-                        %disp('boundary found... exiting')
-                        boundary= 1;
-                    end
+                    %recompute gradient 
+                    attempt= attempt+1;
+                    disp(strcat('!!!!!!!Attempting next direction: ', num2str(attempt)))
                 end
-                i=i+1;
-                obj.iteration= obj.iteration+ 1;
+            disp(obj.iteration)
             end
+            obj.iteration= obj.iteration+ 1;
             %------------update entropy map------------
             obj.entropyMap= updateEntropyMap(obj);
             
@@ -187,7 +201,6 @@ classdef robot
                 title('Mutual information map')
                 drawnow
             end
-            %pause
         end
         
         %Simulates the communication between two robots and
@@ -205,7 +218,7 @@ classdef robot
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    methods(Access = private)       
+    methods(Access = private)
         %initialize prior for every cell of the environment
         function obj = initializePriorDistribution(obj)
             
