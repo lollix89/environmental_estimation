@@ -117,8 +117,6 @@ classdef robot
                         && ~(any(ismember(ceil(obj.stations./obj.GPSCoarseness), [bestWaypointX bestWaypointY] , 'rows')))
                     
                     %-------now i know all the moves are legal----
-                    a=(bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2);
-                    b=(bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2);
                     
                     wayPointDistance= pdist([obj.robotPosition(1) obj.robotPosition(2); (bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) (bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2)]);
                     distOneSample= obj.sampleFr* obj.velocity;
@@ -130,6 +128,8 @@ classdef robot
                     if obj.robotPosition(1)- obj.samplingPoints(1,end) ~= 0 || obj.robotPosition(2)- obj.samplingPoints(2,end) ~= 0
                         gapDistance= pdist([obj.robotPosition(1) obj.robotPosition(2); obj.samplingPoints(1,end) obj.samplingPoints(2,end)]);
                     end
+                    startPointX= obj.robotPosition(1);
+                    startPointY= obj.robotPosition(2);
                     dirX= (bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) - obj.robotPosition(1);
                     dirY= (bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) - obj.robotPosition(2);
                     while  obj.distance- startDist <=  wayPointDistance && wayPointDistance -(obj.distance -startDist) >= obj.sampleFr* obj.velocity
@@ -142,15 +142,14 @@ classdef robot
                             distanceY= ceil(distNextSample* sin(atan(abs(dirY)/abs(dirX))));
                         else
                             distanceX= 0;
-                            distanceY= distNextSample;
+                            distanceY= ceil(distNextSample);
                         end
-                        sampleX= obj.samplingPoints(1,end) + bestDirection(1,attempt)* distanceX;
-                        sampleY= obj.samplingPoints(2,end) + bestDirection(2,attempt)* distanceY;
-                        if ~rem(sampleX,1) == 0 || ~rem(sampleY,1) == 0
-                            disp('bug because one of the two is not integer')
-                        
-                        end
+                        sampleX= startPointX + bestDirection(1,attempt)* distanceX;
+                        sampleY= startPointY + bestDirection(2,attempt)* distanceY;
+
                         obj.samplingPoints= [obj.samplingPoints [sampleX sampleY]'];
+                        startPointX= obj.samplingPoints(1,end);
+                        startPointY= obj.samplingPoints(2,end);
                         obj.distance= obj.distance + distNextSample;
                         
                         %------------plot the sampling points on the map---------
