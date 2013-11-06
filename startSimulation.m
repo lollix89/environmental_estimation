@@ -53,7 +53,7 @@ for currentSimulation=1:nSimulations
     
     %-----------------simulation step----------------------
     while r.distance< 3020
-        r= r.flyNextWayPoints();
+        r= r.flyNextWayPoint();
     end
     %-------------------sample temperature from resulting probability---------------
     sampleTemperatureProbability(r, 1);

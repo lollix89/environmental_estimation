@@ -85,9 +85,10 @@ classdef robot
             obj.stations= obj.stations(1:end-1,:);
             obj.samplingPoints= [obj.robotPosition(1); obj.robotPosition(2)];
         end
+                
         
-        %------------flies around the environment-----------------
-        function obj = flyNextWayPoints(obj)
+        %------------flies to next waypoint-----------------
+        function obj = flyNextWayPoint(obj)
             global PlotOn;
             totalEntropy= sum(obj.entropyMap(:));
             %---------------------saving RMSE for comparison-----------------
