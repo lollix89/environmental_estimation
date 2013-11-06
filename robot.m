@@ -132,12 +132,12 @@ classdef robot
                     end
                     dirX= (bestWaypointX*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) - obj.robotPosition(1);
                     dirY= (bestWaypointY*obj.GPSCoarseness)-floor(obj.GPSCoarseness/2) - obj.robotPosition(2);
-                    while  obj.distance- startDist <=  wayPointDistance
+                    while  obj.distance- startDist <=  wayPointDistance && wayPointDistance -(obj.distance -startDist) >= obj.sampleFr* obj.velocity
 
                         distNextSample= distOneSample- gapDistance;
                         gapDistance= 0;
                         %--------sample points on the way to the next waypoint ----
-                        if bestDirection(1,attempt) ~= 0
+                        if dirX ~= 0
                             distanceX= ceil(distNextSample* cos(atan(abs(dirY)/abs(dirX))));
                             distanceY= ceil(distNextSample* sin(atan(abs(dirY)/abs(dirX))));
                         else
@@ -146,7 +146,10 @@ classdef robot
                         end
                         sampleX= obj.samplingPoints(1,end) + bestDirection(1,attempt)* distanceX;
                         sampleY= obj.samplingPoints(2,end) + bestDirection(2,attempt)* distanceY;
+                        if ~rem(sampleX,1) == 0 || ~rem(sampleY,1) == 0
+                            disp('bug because one of the two is not integer')
                         
+                        end
                         obj.samplingPoints= [obj.samplingPoints [sampleX sampleY]'];
                         obj.distance= obj.distance + distNextSample;
                         
