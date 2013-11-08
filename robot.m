@@ -33,7 +33,7 @@ classdef robot
         %tInterval is the coarseness of values
         %lDistribution is the distribution probability of P(y|x)
         
-       function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
+       function obj = robot(rField, staticStations)
             if nargin == 0
                 disp('This constructor requires at least one argument!!')
             elseif nargin > 0
@@ -41,18 +41,6 @@ classdef robot
                 obj.fieldExtent= size(obj.RField.Field);
                 if nargin > 1
                     obj.stations= staticStations;
-                    if nargin > 2
-                        obj.likelihoodVariance = lVariance;
-                        if nargin > 3
-                            obj.temperatureRange   = tRange;
-                            if nargin > 4
-                                obj.temperatureInterval    = tInterval;
-                                if nargin > 5
-                                    obj.likelihoodDistribution  = lDistribution;
-                                end
-                            end
-                        end
-                    end
                 end
             end
             %--------------assign a a random position in the grid-------------
@@ -70,17 +58,16 @@ classdef robot
             %---------------create temperatureVector------------------
             obj.temperatureVector= (obj.temperatureRange(1):obj.temperatureInterval:obj.temperatureRange(2));
             %-------------initialize probabilities distributions----------
-            %obj= initializeLikelihood(obj);
             obj= initializePriorDistribution(obj);
             %----------------initialize mutualInformationMap---------------
             obj.mutualInformationMap= 30.*ones(ceil(obj.fieldExtent(1)/obj.gridCoarseness),ceil(obj.fieldExtent(2)/obj.gridCoarseness));
             %------------sample field at current position and at eventually present stations-------------
             obj.stations(end+1,:)= obj.robotPosition;
             for idx=1:size(obj.stations,1)
-                fieldValue= obj.RField.sampleField(obj.stations(idx,1),obj.stations(idx,2), obj.gridCoarseness);
+                fieldValue= obj.RField.sampleField(obj.stations(idx,1),obj.stations(idx,2));
                 %compute posterior update prior for the environment and update
                 %mutual information map
-                obj= updatePosteriorMap(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
+                obj= computePosteriorAndMutualInfo(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
             end
             obj.entropyMap= updateEntropyMap(obj);   
             obj.stations= obj.stations(1:end-1,:);
@@ -90,35 +77,31 @@ classdef robot
         %------------flies around the environment-----------------
         function obj = flyNextWayPoints(obj)
             global PlotOn;
-            totalEntropy= sum(obj.entropyMap(:));
             %---------------------saving RMSE for comparison-----------------
-            temperatureMap= sampleTemperatureProbability(obj, 0);
+            temperatureMap= sampleTemperatureProbability(obj);
+            if PlotOn==1
+                subplot(1,3,2)
+                [~, ch]=contourf(1:5:200,1:5:200,temperatureMap,30);
+                set(ch,'edgecolor','none');
+                set(gca,'FontSize',16)
+                axis('equal')
+                axis([-2 202 -2 202])
+                drawnow
+            end
             obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness), 1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))-...
                 obj.RField.Field(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness),1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))).^2))); ...
-                obj.iteration; obj.distance; totalEntropy];
-            %-----------plot current entropy--------------------
-            if PlotOn== 1
-                subplot(3,2,2)
-                title('Entropy plot')
-                ylabel('Entropy')
-                xlabel('# of iterations')
-                plot(obj.iteration, totalEntropy, 'r-')
-                hold on;
-            end
+                obj.iteration; obj.distance];
             
             [bestPositionX, bestPositionY]= findBestPosition(obj);
-            %disp('**************debug************')
-            %disp(strcat('Iteration # ', num2str(obj.iteration)))
-            %disp(strcat('Next best position is: ', num2str([bestPositionX bestPositionY])))
             
             if ~(any(ismember(ceil(obj.stations./obj.gridCoarseness), [bestPositionX bestPositionY] , 'rows')))
                 
                 bestPositionX= (bestPositionX*obj.gridCoarseness)-floor(obj.gridCoarseness/2);
                 bestPositionY= (bestPositionY*obj.gridCoarseness)-floor(obj.gridCoarseness/2);
                 
-                fieldValue= obj.RField.sampleField(bestPositionX, bestPositionY, obj.gridCoarseness);
+                fieldValue= obj.RField.sampleField(bestPositionX, bestPositionY);
                 %-------compute posterior update prior for the environment and update mutual information map-------------
-                obj= updatePosteriorMap(obj, fieldValue, bestPositionX, bestPositionY);
+                obj= computePosteriorAndMutualInfo(obj, fieldValue, bestPositionX, bestPositionY);
                 
                 previousPosition= obj.robotPosition;
                 obj.robotPosition=[bestPositionX bestPositionY];
@@ -127,7 +110,7 @@ classdef robot
                 
                 %------------plot the path followed on the map---------
                 if PlotOn==1
-                    subplot(3,2,3)
+                    subplot(1,3,1)
                     title('Robot path on the field')
                     plot(previousPosition(1,2),previousPosition(1,1), 'w*')
                     plot(obj.robotPosition(1,2),obj.robotPosition(1,1), 'r*')
@@ -143,13 +126,13 @@ classdef robot
             obj.entropyMap= updateEntropyMap(obj);
             
             if PlotOn==1
-                subplot(3,2,1)
-                imagesc(obj.mutualInformationMap)
-                hold on;
-                for j=1:size(obj.stations,1)
-                    plot(ceil(obj.stations(j,2)/obj.gridCoarseness),ceil(obj.stations(j,1)/obj.gridCoarseness), 'ko')
-                end
+                subplot(1,3,3)
+                [~, ch]=contourf(1:5:200,1:5:200,obj.mutualInformationMap,30);
+                set(ch,'edgecolor','none');
+                set(gca,'FontSize',16)
                 title('Mutual information map')
+                axis('equal')
+                axis([-2 202 -2 202])
                 drawnow
             end
             %pause
