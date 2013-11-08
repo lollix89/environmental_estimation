@@ -31,7 +31,7 @@ for currentSimulation=1:nSimulations
     else
         error('Directory does not exist!!!')
     end
-        fid = fopen('./test.txt','w');%open output file
+    fid = fopen('./test.txt','w');%open output file
     %--------------------initialize field-------------------------
     rF= randomField(field,range);
     %--------------------initialize object robot--------------------
@@ -58,10 +58,6 @@ for currentSimulation=1:nSimulations
     while r.distance< 3020
         r= r.flyNextWayPoint();
     end
-    %-------------------sample temperature from resulting probability---------------
-    sampleTemperatureProbability(r, 1);
-    %errorMap= abs(field - temperatureMap);
-    disp(['>>jobID: ' num2str(jobID) ' worked on field ' num2str(fieldValue) '. RMSE values: ' num2str(r.data(1,:)) ])
     
     xSampled= r.data(3,:);
     x= 1:3000;

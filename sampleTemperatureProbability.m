@@ -10,8 +10,12 @@ for x=1:size(obj.fieldPosterior, 1)
         
         c = cumsum(reshape(obj.fieldPosterior(x,y,:), 1, size(obj.fieldPosterior,3)));
         r = rand(1,1);
-        e = [1,c];
+        e = [0,c];
         [~,bin] = histc(r,e);
+        if bin==0
+            disp('ohoho')
+        end
+        
         sampledTemperatureMap(x,y) = obj.temperatureVector(bin);
         
     end

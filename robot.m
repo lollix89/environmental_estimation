@@ -160,7 +160,6 @@ classdef robot
                     attempt= attempt+1;
                     disp(strcat('!!!!!!!Attempting next direction: ', num2str(attempt)))
                 end
-            disp(obj.iteration)
             end
             obj.iteration= obj.iteration+ 1;
             %------------update entropy map------------

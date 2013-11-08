@@ -9,9 +9,9 @@ for x_=1:size(obj.fieldPosterior, 1)
 
 
         if currentDistance <= obj.RField.Range
-            varianceFunction= .001 + .05*currentDistance;
+            varianceFunction= .1 + .05*currentDistance;
         else
-            varianceFunction=  .001 + .2*currentDistance;
+            varianceFunction=  .1 + .2*currentDistance;
         end
         
 
@@ -20,8 +20,11 @@ for x_=1:size(obj.fieldPosterior, 1)
         %compute posterior        
         evidence= sum(likelihoodCurrentCell.*reshape(obj.fieldPrior(x_,y_,:), 1, size(obj.fieldPrior,3)));
         posterior= (likelihoodCurrentCell.*reshape(obj.fieldPrior(x_,y_,:), 1, size(obj.fieldPrior,3)))./evidence;
-        obj.fieldPosterior(x_,y_,:)= reshape(posterior, 1,1, size(obj.fieldPrior,3));
-
+        obj.fieldPosterior(x_,y_,:)= reshape(posterior, 1,1, size(obj.fieldPosterior,3));
+        if any(isnan(posterior))
+           disp('nooo') 
+        end
+        
         %update mutual information!!        
         %xEntropy= entropy (reshape(obj.fieldPrior(x,y,:), 1, size(obj.temperatureVector,2)));
         xyEntropy= entropy(reshape(obj.fieldPosterior(x_,y_,:), 1, size(obj.fieldPrior,3)));
