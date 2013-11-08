@@ -6,8 +6,8 @@ PlotOn= 1;
 
 %-------------position of the stations (static sensors)--------------
 stations=[];
-% stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
-% stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
+stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
+stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
 %--------------start simulation
 for currentSimulation=1:nSimulations
     
@@ -31,8 +31,7 @@ for currentSimulation=1:nSimulations
     else
         error('Directory does not exist!!!')
     end
-    
-    disp(['---->jobID ' num2str(jobID) ' works on field ' num2str(fieldValue)])
+        fid = fopen('./test.txt','w');%open output file
     %--------------------initialize field-------------------------
     rF= randomField(field,range);
     %--------------------initialize object robot--------------------
@@ -40,15 +39,19 @@ for currentSimulation=1:nSimulations
     %----------------------plot field---------------------
     if PlotOn==1
         figure(1)
-        subplot(3,2,3)
-        imagesc(r.RField.Field)
+        subplot(1,3,1)
+        [~, ch]=contourf(1:200,1:200,field,30);
+        set(ch,'edgecolor','none');
+        set(gca,'FontSize',16)
         hold on;
         for i=1:size(stations,1)
             plot(stations(i,2),stations(i,1), 'ko')
         end
-        drawnow
-        
+        axis('equal')
+        axis([-2 202 -2 202])
         hold on;
+        drawnow
+
     end
     
     %-----------------simulation step----------------------
@@ -90,6 +93,11 @@ for currentSimulation=1:nSimulations
     FileName= strcat('./results/newSimulationResultJob_', num2str(jobID), '_', num2str(currentSimulation), '.mat');
     save( FileName, 'RMSEI', 'entropyI','jobID', 'fieldValue');
     
+    for i=1:length(RMSEI)
+        fprintf(fid,'%f ',RMSEI(i));
+    end
+    fprintf(fid,'\n');
+    fclose(fid);
     
 end
 

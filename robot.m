@@ -28,31 +28,14 @@ classdef robot
     end
     
     methods
-        %rField simulates the environment
-        %fieldExtent is #rows and #cols of the field
-        %lVariance is the variance of P(y|x)
-        %tRange is the minimum and maxium of temperature
-        %tInterval is the coarseness of values
-        %lDistribution is the distribution probability of P(y|x)
+
         
-        function obj = robot(rField, staticStations, lVariance, tRange, tInterval, lDistribution)
+        function obj = robot(rField, staticStations)
             if nargin > 0
                 obj.RField= rField;
                 obj.fieldExtent= size(obj.RField.Field);
                 if nargin > 1
                     obj.stations= staticStations;
-                    if nargin > 2
-                        obj.likelihoodVariance = lVariance;
-                        if nargin > 3
-                            obj.temperatureRange   = tRange;
-                            if nargin > 4
-                                obj.temperatureInterval    = tInterval;
-                                if nargin > 5
-                                    obj.likelihoodDistribution  = lDistribution;
-                                end
-                            end
-                        end
-                    end
                 end
             end
             %--------------assign a a random position in the grid-------------
@@ -79,7 +62,7 @@ classdef robot
                 fieldValue= obj.RField.sampleField(obj.stations(idx,1),obj.stations(idx,2));
                 %compute posterior update prior for the environment and update
                 %mutual information map
-                obj= updatePosteriorMap(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
+                obj= computePosteriorAndMutualInfo(obj, fieldValue, obj.stations(idx,1),obj.stations(idx,2));
             end
             obj.entropyMap= updateEntropyMap(obj);
             obj.stations= obj.stations(1:end-1,:);
@@ -90,20 +73,18 @@ classdef robot
         %------------flies to next waypoint-----------------
         function obj = flyNextWayPoint(obj)
             global PlotOn;
-            totalEntropy= sum(obj.entropyMap(:));
             %---------------------saving RMSE for comparison-----------------
-            temperatureMap= sampleTemperatureProbability(obj, 0);
-            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:end, 1:obj.gridCoarseness:end)-...
-                obj.RField.Field(1:obj.gridCoarseness:end,1:obj.gridCoarseness:end)).^2))); obj.iteration; obj.distance; totalEntropy];
-            %-----------plot current entropy--------------------
-            if PlotOn== 1
-                subplot(3,2,2)
-                title('Entropy plot')
-                ylabel('Entropy')
-                xlabel('# of iterations')
-                plot(obj.iteration, totalEntropy, 'r-')
-                hold on;
+            temperatureMap= sampleTemperatureProbability(obj);
+            if PlotOn==1
+                subplot(1,3,2)
+                [~, ch]=contourf(1:5:200,1:5:200,temperatureMap,30);
+                set(ch,'edgecolor','none');
+                set(gca,'FontSize',16)
+                axis('equal')
+                axis([-2 202 -2 202])
+                drawnow    
             end
+            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap- obj.RField.Field(1:obj.gridCoarseness:end,1:obj.gridCoarseness:end)).^2))); obj.iteration; obj.distance];
             %-----------find best direction according to mutual information
             %map gradient
             bestDirection= findBestDirection(obj);
@@ -153,18 +134,9 @@ classdef robot
                         startPointY= obj.samplingPoints(2,end);
                         obj.distance= obj.distance + distNextSample;
                         
-                        %------------plot the sampling points on the map---------
-                        %                        currentSamplingPoint= obj.samplingPoints(:, end);
-                        %                         if PlotOn==1
-                        %                             subplot(3,2,3)
-                        %                             title('Robot path on the field')
-                        %                             plot(currentSamplingPoint(2,1),currentSamplingPoint(1,1), 'k+')
-                        %                             hold on;
-                        %                             drawnow
-                        %                         end
                         fieldValue= obj.RField.sampleField(sampleX, sampleY);
                         %-------compute posterior update prior for the environment and update mutual information map-------------
-                        obj= updatePosteriorMap(obj, fieldValue, sampleX, sampleY);
+                        obj= computePosteriorAndMutualInfo(obj, fieldValue, sampleX, sampleY);
                     end
                     
                     previousPosition= obj.robotPosition;
@@ -173,7 +145,7 @@ classdef robot
                     
                     %------------plot the path followed on the map---------
                     if PlotOn==1
-                        subplot(3,2,3)
+                        subplot(1,3,1)
                         title('Robot path on the field')
                         plot(previousPosition(1,2),previousPosition(1,1), 'w*')
                         plot(obj.robotPosition(1,2),obj.robotPosition(1,1), 'r*')
@@ -195,14 +167,14 @@ classdef robot
             obj.entropyMap= updateEntropyMap(obj);
             
             if PlotOn==1
-                subplot(3,2,1)
-                imagesc(obj.mutualInformationMap)
-                hold on;
-                for j=1:size(obj.stations,1)
-                    plot(ceil(obj.stations(j,2)/obj.gridCoarseness),ceil(obj.stations(j,1)/obj.gridCoarseness), 'ko')
-                end
-                title('Mutual information map')
+                subplot(1,3,3)
+                [~, ch]=contourf(1:5:200,1:5:200,obj.mutualInformationMap,30);
+                set(ch,'edgecolor','none');
+                set(gca,'FontSize',16)
+                axis('equal')
+                axis([-2 202 -2 202])
                 drawnow
+
             end
         end
         
