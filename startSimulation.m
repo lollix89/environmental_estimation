@@ -47,10 +47,11 @@ for currentSimulation=1:nSimulations
         for i=1:size(stations,1)
             plot(stations(i,2),stations(i,1), 'ko')
         end
-        drawnow
         axis('equal')
         axis([-2 202 -2 202])
         hold on;
+        drawnow
+
     end
     
     %-----------------simulation step----------------------

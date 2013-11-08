@@ -26,12 +26,6 @@ classdef robot
     end
     
     methods
-        %rField simulates the environment
-        %fieldExtent is #rows and #cols of the field
-        %lVariance is the variance of P(y|x)
-        %tRange is the minimum and maxium of temperature
-        %tInterval is the coarseness of values
-        %lDistribution is the distribution probability of P(y|x)
         
        function obj = robot(rField, staticStations)
             if nargin == 0
@@ -88,8 +82,7 @@ classdef robot
                 axis([-2 202 -2 202])
                 drawnow
             end
-            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness), 1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))-...
-                obj.RField.Field(1:obj.gridCoarseness:ceil(obj.fieldExtent(1)/obj.gridCoarseness),1:obj.gridCoarseness:ceil(obj.fieldExtent(2)/obj.gridCoarseness))).^2))); ...
+            obj.data(:, end+1) = [sqrt(mean(mean((temperatureMap- obj.RField.Field(1:obj.gridCoarseness:size(obj.RField.Field,1),1:obj.gridCoarseness:size(obj.RField.Field,1))).^2))); ...
                 obj.iteration; obj.distance];
             
             [bestPositionX, bestPositionY]= findBestPosition(obj);
