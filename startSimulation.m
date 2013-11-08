@@ -68,7 +68,7 @@ for currentSimulation=1:nSimulations
     save( FileName, 'RMSE', 'entropy','jobID');
     
     for i=1:length(RMSE)
-        fprintf(fid,'%f ',RMSE_(i));
+        fprintf(fid,'%f ',RMSE(i));
     end
     fprintf(fid,'\n');
     fclose(fid);
